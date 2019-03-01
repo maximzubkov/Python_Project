@@ -1,4 +1,4 @@
-# Python_Project
+# Zumamotu
 
 ## Участники проекта:
 * Зубков Максим [github](https://github.com/maximzubkov)
