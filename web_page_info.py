@@ -1,7 +1,7 @@
 ### TODO: потестить
 
 import requests
-import bs4 
+from bs4 import BeautifulSoup
 
 api_key = "trnsl.1.1.20190308T130505Z.54bc8184ebd6c2e8.87af28bd612e1abcccc8a24fd7f50bc587b05014"
 yandex_translator_url = "https://translate.yandex.net/api/v1.5/tr.json/translate"
@@ -57,8 +57,9 @@ def info_from_html(url,
     soup = BeautifulSoup(r.text, "html.parser")
     text = ''.join(soup.findAll(text=True))
     # TODO: вытащить из html язык, на котором написана страница
-    num_of_audio = media_files_frequency('audio')
-    num_of_video = media_files_frequency('video')
-    num_of_pics = media_files_frequency('img')
+    num_of_audio = media_files_frequency(soup, 'audio')
+    num_of_video = media_files_frequency(soup, 'video')
+    num_of_pics = media_files_frequency(soup, 'img')
+    print(num_of_pics)
     
 info_from_html('https://ru.wikipedia.org/wiki/Ассоциативный_массив')
