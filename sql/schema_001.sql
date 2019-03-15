@@ -1,3 +1,8 @@
+
+DROP TABLE IF EXISTS data
+DROP TABLE IF EXISTS webpage
+DROP TABLE IF EXISTS users
+
 CREATE TABLE "webpage" (
 	"id" serial,
 	"url" VARCHAR(255),
@@ -27,8 +32,8 @@ CREATE TABLE "data" (
 	"y" FLOAT NOT NULL,
 	"w" FLOAT NOT NULL,
 	"h" FLOAT NOT NULL,
-	"isClique" BOOLEAN NOT NULL,
-	"time" TIME NOT NULL,
+	"is_click" BOLLEAN NOT NULL,
+	"ts" INT NOT NULL,
 	CONSTRAINT data_pk PRIMARY KEY ("id")
 ) WITH (
   OIDS=FALSE
