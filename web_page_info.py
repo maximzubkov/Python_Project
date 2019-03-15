@@ -60,6 +60,6 @@ def info_from_html(url,
     num_of_audio = media_files_frequency(soup, 'audio')
     num_of_video = media_files_frequency(soup, 'video')
     num_of_pics = media_files_frequency(soup, 'img')
-    print(num_of_pics)
+    #print(num_of_pics)
     
 info_from_html('https://ru.wikipedia.org/wiki/Ассоциативный_массив')

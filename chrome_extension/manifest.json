@@ -1,0 +1,14 @@
+{ 	
+	"manifest_version": 2, 
+	"name": "Zamamotu", 
+	"description": "Basic service to track man's activity on a webpage", 
+	"version": "0.0.0.1" ,
+	"author" : "Turkov Matvey",
+	"browser_actions" : {
+		"default_title" : "Hello"
+	},
+	"chrome_url_overrides" : {
+		"newtab" : "index.html"
+	},
+	"permissions" : ["activeTab"]
+}
