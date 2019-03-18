@@ -1,7 +1,9 @@
 
-DROP TABLE IF EXISTS data
-DROP TABLE IF EXISTS webpage
-DROP TABLE IF EXISTS users
+# DROP TABLE IF EXISTS data
+# DROP TABLE IF EXISTS webpage
+# DROP TABLE IF EXISTS users
+
+CREATE LANGUAGE plpythonu;
 
 CREATE TABLE "webpage" (
 	"id" serial,
@@ -32,8 +34,8 @@ CREATE TABLE "data" (
 	"y" FLOAT NOT NULL,
 	"w" FLOAT NOT NULL,
 	"h" FLOAT NOT NULL,
-	"is_click" BOLLEAN NOT NULL,
-	"ts" INT NOT NULL,
+	"is_click" BOOLEAN NOT NULL,
+	"ts" TIMESTAMP NOT NULL,
 	CONSTRAINT data_pk PRIMARY KEY ("id")
 ) WITH (
   OIDS=FALSE
