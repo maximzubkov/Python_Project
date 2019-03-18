@@ -5,6 +5,7 @@
 
 CREATE LANGUAGE plpythonu;
 
+
 CREATE TABLE "webpage" (
 	"id" serial,
 	"url" VARCHAR(255),
@@ -47,4 +48,12 @@ ALTER TABLE "webpage" ADD CONSTRAINT "webpage_fk0" FOREIGN KEY ("user_id") REFER
 
 
 ALTER TABLE "data" ADD CONSTRAINT "data_fk0" FOREIGN KEY ("webpage_id") REFERENCES "webpage"("id");
+
+CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER, k INTEGER) RETURNS VOID AS 
+$$import subprocess
+subprocess.call(['/usr/bin/python', '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py', str(webpage_id), str(k)])
+$$ LANGUAGE plpythonu;
+
+
+
 
