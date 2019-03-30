@@ -1,10 +1,13 @@
 var SEND_INTERVAL = 3000; // interval 
 var CAPTURE_INTERVAL = 30;  // interval of capturing a mouse event
 var MAX_SAVED = (1000/CAPTURE_INTERVAL) * (SEND_INTERVAL/1000);
+var CHUNK_TYPE_MOUSE = 0
+var CHUNK_TYPE_KEYBOARD = 1
 
-function add_chunk(e) {
+function add_chunk_mouse(e) {
 	moment= new Date();
 	return({
+		type: CHUNK_TYPE_MOUSE,
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
@@ -12,6 +15,18 @@ function add_chunk(e) {
 			positionX: e.clientX,
 			positionY: e.clientY
 		}
+	})
+}
+function built_key_chunk(event) {
+	moment= new Date();
+	return({
+		type:CHUNK_TYPE_KEYBOARD,
+		minutes:moment.getMinutes(),
+		seconds:moment.getSeconds(),
+		miliseconds:moment.getMilliseconds(),
+		keypress: event.key,
+		shiftPress:event.shiftKey,
+		ctrlPress:event.ctrlKey,
 	})
 }
 
@@ -24,37 +39,29 @@ var mouseCache = {
 	add:function(income) {
 		if (this.saved.length == MAX_SAVED){
 			console.log(this.saved)
-			this.cacheFull == true
+			this.cacheFull == true //TODO cacheFULL flag
 			this.saved = []
 			}
 		this.saved.push(income)
 	}
 }
 
-onmousemove = function(){mouseCache.add(add_chunk(event))}
-console.log(mouseCache.cacheFull)
-setTimeout(console.log(mouseCache.cacheFull),3000)
-// if (cacheFull)
-// var finalVal = '';
+onmousemove = function(){mouseCache.add(add_chunk_mouse(event))}
 
-// for (var i = 0; i < content.length; i++) {
-//     var value = content[i];
 
-//     for (var j = 0; j < value.length; j++) {
-//         var innerValue =  value[j]===null?'':value[j].toString();
-//         var result = innerValue.replace(/"/g, '""');
-//         if (result.search(/("|,|\n)/g) >= 0)
-//             result = '"' + result + '"';
-//         if (j > 0)
-//             finalVal += ',';
-//         finalVal += result;
-//     }
-
-//     finalVal += '\n';
-// }
-
-// console.log(finalVal);
-
-// var download = document.getElementById('download');
-// download.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(finalVal));
-// download.setAttribute('download', 'test.csv');
+document.addEventListener("keypress", function onPress(event) {
+	if (event.key) {
+		keyBoardCache.add(built_key_chunk(event))
+	}
+});
+var keyBoardCache = {
+	saved:[],
+	cacheFull:false,//TODO cacheFULL flag
+	clear: function() {
+		this.saved = []
+	},
+	add:function(income) {
+		this.saved.push(income)
+	}
+}
+setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.saved=[]},3000)
