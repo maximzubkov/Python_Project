@@ -2,11 +2,13 @@
 	"manifest_version": 2, 
 	"name": "Zamamotu", 
 	"description": "Basic service to track man's activity on a webpage", 
-	"version": "0.0.4" ,
+	"version": "0.0.6" ,
 	"content_scripts": [
 	  {
-	    "matches": ["http://*/*","https://*/*"],
-	    "js": ["contentScript.js"]
+	   	"matches": [
+	   	  "<all_urls>"
+	   	], 
+	    "js": ["content.js"]
 	  }
 	],
 	"author" : "Turkov Matvey"
