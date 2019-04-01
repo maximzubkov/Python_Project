@@ -29,6 +29,18 @@ function built_key_chunk(event) {
 		ctrlPress:event.ctrlKey,
 	})
 }
+// function built_key_delete_chunk(event) {
+// 	moment= new Date();
+// 	return({
+// 		type:CHUNK_TYPE_KEYBOARD,
+// 		minutes:moment.getMinutes(),
+// 		seconds:moment.getSeconds(),
+// 		miliseconds:moment.getMilliseconds(),
+// 		keypress: event.key,
+// 		shiftPress:event.shiftKey,
+// 		ctrlPress:event.ctrlKey,
+// 	})
+// }
 
 var mouseCache = {
 	saved:[],
@@ -49,7 +61,7 @@ var mouseCache = {
 onmousemove = function(){mouseCache.add(add_chunk_mouse(event))}
 
 
-document.addEventListener("keypress", function onPress(event) {
+document.addEventListener("keydown", function onPress(event) {
 	if (event.key) {
 		keyBoardCache.add(built_key_chunk(event))
 	}
@@ -65,3 +77,11 @@ var keyBoardCache = {
 	}
 }
 setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.saved=[]},3000)
+
+
+
+
+
+
+
+
