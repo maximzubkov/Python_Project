@@ -11,5 +11,8 @@
 	    "js": ["content.js"]
 	  }
 	],
+	"background": {
+		"scripts":["background.js"]
+	},
 	"author" : "Turkov Matvey"
 }

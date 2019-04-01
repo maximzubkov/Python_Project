@@ -6,8 +6,10 @@ var CHUNK_TYPE_KEYBOARD = 1
 
 function add_chunk_mouse(e) {
 	moment= new Date();
+	site_url = document.location.href
 	return({
 		type: CHUNK_TYPE_MOUSE,
+		current_page:site_url,
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
@@ -19,8 +21,10 @@ function add_chunk_mouse(e) {
 }
 function built_key_chunk(event) {
 	moment= new Date();
+	site_url = document.location.href
 	return({
 		type:CHUNK_TYPE_KEYBOARD,
+		current_page:site_url,
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
@@ -29,19 +33,6 @@ function built_key_chunk(event) {
 		ctrlPress:event.ctrlKey,
 	})
 }
-// function built_key_delete_chunk(event) {
-// 	moment= new Date();
-// 	return({
-// 		type:CHUNK_TYPE_KEYBOARD,
-// 		minutes:moment.getMinutes(),
-// 		seconds:moment.getSeconds(),
-// 		miliseconds:moment.getMilliseconds(),
-// 		keypress: event.key,
-// 		shiftPress:event.shiftKey,
-// 		ctrlPress:event.ctrlKey,
-// 	})
-// }
-
 var mouseCache = {
 	saved:[],
 	cacheFull:false,
