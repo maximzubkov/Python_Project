@@ -4,6 +4,8 @@ var MAX_SAVED = (1000/CAPTURE_INTERVAL) * (SEND_INTERVAL/1000);
 var CHUNK_TYPE_MOUSE = 0
 var CHUNK_TYPE_KEYBOARD = 1
 var CHUNK_TYPE_SCROLL = 2
+var GENERAL_INFO = 3
+var CHUNK_TYPE_DOUBLECLICK = 4
 
 function add_chunk_mouse(e) {
 	moment= new Date();
@@ -47,8 +49,30 @@ function add_key_chunk(event) {
 	})
 }
 
+function systemInfoPage() {
+	moment_in = new Date();
+	browserWindowHeight = window.outerHeight;
+	browserWindowWidth = window.outerWidth;
+	return({
+		type: GENERAL_INFO,
+		currentHeight:browserWindowHeight,
+		currentWidth:browserWindowWidth,
+	})
+}
 
-
+function add_chunk_doubleclick(e) {
+	moment= new Date();
+	site_url = document.location.href
+	dblclick = e.type
+	return({
+		type: CHUNK_TYPE_DOUBLECLICK,
+		current_page:site_url,
+		minutes:moment.getMinutes(),
+		seconds:moment.getSeconds(),
+		miliseconds:moment.getMilliseconds(),
+		event_name:dblclick,
+	})
+}
 
 var mouseCache = {
 	saved:[],
@@ -88,7 +112,7 @@ var keyBoardCache = {
 		this.saved.push(income)
 	}
 }
-setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.saved=[]},3000)
+setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.clear()},3000)
 
 
 
@@ -96,7 +120,7 @@ setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.saved=[]}
 document.addEventListener("scroll",function onScroll(event) {
 	scrollCache.add(add_chunk_scroll())
 });
-setInterval(function() {console.log(scrollCache.saved);scrollCache.saved=[]},3000)
+setInterval(function() {console.log(scrollCache.saved);scrollCache.clear()},3000)
 
 var scrollCache = {
 	saved:[],
@@ -110,7 +134,30 @@ var scrollCache = {
 }
 
 
+setInterval(function() {console.log(systemInfoPage())},5000)
 
+// TODO
+// chrome.runtime.onMessage.addListener(receiver);
+
+// function receiver(request, sender, sendResponse) {
+// console.log(request)
+// }
+
+document.addEventListener("dblclick",function onDBClick(event) {
+	doubleClickCache.add(add_chunk_doubleclick(event))
+});
+
+var doubleClickCache = {
+	saved:[],
+	cacheFull:false,//TODO cacheFULL flag
+	clear: function() {
+		this.saved = []
+	},
+	add:function(income) {
+		this.saved.push(income)
+	}
+}
+setInterval(function() {console.log(doubleClickCache.saved);doubleClickCache.clear()},5000)
 
 
 

@@ -11,6 +11,12 @@
 	    "js": ["content.js"]
 	  }
 	],
+	"permissions": [
+	  "tabs","alarms"
+	],
+	"browser_action": {
+	  "default_icon": "1f408.png"
+	},
 	"background": {
 		"scripts":["background.js"]
 	},
