@@ -6,6 +6,7 @@ var CHUNK_TYPE_KEYBOARD = 1
 var CHUNK_TYPE_SCROLL = 2
 var GENERAL_INFO = 3
 var CHUNK_TYPE_DOUBLECLICK = 4
+var CHUNK_TYPE_SELECTED_TEXT = 5
 
 function add_chunk_mouse(e) {
 	moment= new Date();
@@ -73,6 +74,22 @@ function add_chunk_doubleclick(e) {
 		event_name:dblclick,
 	})
 }
+
+function add_chunk_selected_text(isSelected) {
+	moment= new Date();
+	site_url = document.location.href
+	return({
+		type: CHUNK_TYPE_SELECTED_TEXT,
+		current_page:site_url,
+		minutes:moment.getMinutes(),
+		seconds:moment.getSeconds(),
+		miliseconds:moment.getMilliseconds(),
+		selectedText: isSelected
+	})
+}
+
+
+
 
 var mouseCache = {
 	saved:[],
@@ -159,5 +176,35 @@ var doubleClickCache = {
 }
 setInterval(function() {console.log(doubleClickCache.saved);doubleClickCache.clear()},5000)
 
+var selectedTextCache = {
+	saved:false,
+	cacheFull:false,//TODO cacheFULL flag
+	clear: function() {
+		this.saved = []
+	},
+	add: function(income) {
+		if (this.saved === false){
+			this.saved = income
+		}
+	}
+}
+
+
+function checkSelected() {
+	var selectedFlag = false
+	if (window.getSelection().toString() === "") 
+		{return selectedFlag} 
+	else 
+		{	
+			selectedFlag = true
+			return selectedFlag
+		}
+}
+
+setInterval(function() {
+	if (checkSelected() == true){
+		console.log(add_chunk_selected_text(checkSelected()))
+	}
+},200)
 
 
