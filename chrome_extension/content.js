@@ -17,8 +17,8 @@ function add_chunk_mouse(e) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		mousePlace: {
-			positionX: e.clientX,
+		data: {
+			positionX: e.clientX,	
 			positionY: e.clientY
 		}
 	})
@@ -32,21 +32,37 @@ function add_chunk_scroll() {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		scrollPositionY: window.scrollY
+		data:{
+			scrollPositionY: window.scrollY
+		}
 	})
 }
 function add_key_chunk(event) {
 	moment = new Date();
 	site_url = document.location.href
+	if (event.shiftKey) {
+		var shiftPress = 1
+	}
+	else {
+		var shiftPress = 0
+	}
+	if (event.ctrlKey) {
+		var ctrlPress = 1
+	}
+	else {
+		var ctrlPress = 0
+	}
 	return({
 		type:CHUNK_TYPE_KEYBOARD,
 		current_page:site_url,
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		keypress: event.key,
-		shiftPress:event.shiftKey,
-		ctrlPress:event.ctrlKey,
+		data: {
+			keypress: event.key,
+			shiftPress:shiftPress,
+			ctrlPress:ctrlPress,
+		}
 	})
 }
 
@@ -54,10 +70,17 @@ function systemInfoPage() {
 	moment_in = new Date();
 	browserWindowHeight = window.outerHeight;
 	browserWindowWidth = window.outerWidth;
+	site_url = document.location.href
 	return({
 		type: GENERAL_INFO,
-		currentHeight:browserWindowHeight,
-		currentWidth:browserWindowWidth,
+		current_page:site_url,
+		minutes:moment_in.getMinutes(),
+		seconds:moment_in.getSeconds(),
+		miliseconds:moment_in.getMilliseconds(),
+		data: {
+			currentHeight:browserWindowHeight,
+			currentWidth:browserWindowWidth,
+		}
 	})
 }
 
@@ -71,7 +94,9 @@ function add_chunk_doubleclick(e) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		event_name:dblclick,
+		data: {
+			event_name:dblclick,
+		}
 	})
 }
 
@@ -84,7 +109,9 @@ function add_chunk_selected_text(isSelected) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		selectedText: isSelected
+		data: {
+			selectedText: isSelected
+		}
 	})
 }
 
@@ -99,7 +126,15 @@ var mouseCache = {
 	},
 	add:function(income) {
 		if (this.saved.length == MAX_SAVED){
-			console.log(this.saved)
+			fetch("http://127.0.0.1:5000/api/get_content", {
+			  method: "POST", 
+			  headers: {
+			    'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/'
+			  },
+			  body: JSON.stringify(this.saved)
+			}).then(res => {
+			  console.log("Request complete! response:", res.body);
+			});
 			this.cacheFull == true //TODO cacheFULL flag
 			this.saved = []
 			}
@@ -129,7 +164,13 @@ var keyBoardCache = {
 		this.saved.push(income)
 	}
 }
-setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.clear()},3000)
+setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(keyBoardCache.saved)
+											}).then(res => {
+												console.log("Request complete! response:", res.body);
+											});
+										keyBoardCache.clear()},3000)
 
 
 
@@ -137,7 +178,14 @@ setInterval(function() {console.log(keyBoardCache.saved);keyBoardCache.clear()},
 document.addEventListener("scroll",function onScroll(event) {
 	scrollCache.add(add_chunk_scroll())
 });
-setInterval(function() {console.log(scrollCache.saved);scrollCache.clear()},3000)
+
+setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(scrollCache.saved)
+											}).then(res => {
+												console.log("Request complete! response:", res.body);
+											});
+											scrollCache.clear()},3000)
 
 var scrollCache = {
 	saved:[],
@@ -151,7 +199,12 @@ var scrollCache = {
 }
 
 
-setInterval(function() {console.log(systemInfoPage())},5000)
+setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(systemInfoPage())
+											}).then(res => {
+												console.log("Request complete! response:", res.body);
+											});},5000)
 
 // TODO
 // chrome.runtime.onMessage.addListener(receiver);
@@ -174,7 +227,12 @@ var doubleClickCache = {
 		this.saved.push(income)
 	}
 }
-setInterval(function() {console.log(doubleClickCache.saved);doubleClickCache.clear()},5000)
+setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(doubleClickCache.saved)
+											}).then(res => {
+												console.log("Request complete! response:", res.body);
+											});doubleClickCache.clear()},5000)
 
 var selectedTextCache = {
 	saved:false,
@@ -191,20 +249,23 @@ var selectedTextCache = {
 
 
 function checkSelected() {
-	var selectedFlag = false
+	var selectedFlag = 0
 	if (window.getSelection().toString() === "") 
 		{return selectedFlag} 
 	else 
 		{	
-			selectedFlag = true
+			selectedFlag = 1
 			return selectedFlag
 		}
 }
 
 setInterval(function() {
-	if (checkSelected() == true){
-		console.log(add_chunk_selected_text(checkSelected()))
-	}
-},200)
+	if (checkSelected() === 1)
+		{fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(add_chunk_selected_text(checkSelected()))
+											}).then(res => {
+												console.log("Request complete! response:", res.body);
+											})}},200)
 
 
