@@ -3,3 +3,5 @@
 *.crx
 *.pem
 venv/
+*.txt
+
