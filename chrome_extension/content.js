@@ -9,7 +9,7 @@ var CHUNK_TYPE_DOUBLECLICK = 4
 var CHUNK_TYPE_SELECTED_TEXT = 5
 
 function add_chunk_mouse(e) {
-	moment= new Date();
+	moment = new Date();
 	site_url = document.location.href
 	return({
 		type: CHUNK_TYPE_MOUSE,
@@ -24,7 +24,7 @@ function add_chunk_mouse(e) {
 	})
 }
 function add_chunk_scroll() {
-	moment= new Date();
+	moment = new Date();
 	site_url = document.location.href
 	return({
 		type: CHUNK_TYPE_SCROLL,
@@ -36,7 +36,7 @@ function add_chunk_scroll() {
 	})
 }
 function add_key_chunk(event) {
-	moment= new Date();
+	moment = new Date();
 	site_url = document.location.href
 	return({
 		type:CHUNK_TYPE_KEYBOARD,
@@ -62,7 +62,7 @@ function systemInfoPage() {
 }
 
 function add_chunk_doubleclick(e) {
-	moment= new Date();
+	moment = new Date();
 	site_url = document.location.href
 	dblclick = e.type
 	return({
@@ -76,7 +76,7 @@ function add_chunk_doubleclick(e) {
 }
 
 function add_chunk_selected_text(isSelected) {
-	moment= new Date();
+	moment = new Date();
 	site_url = document.location.href
 	return({
 		type: CHUNK_TYPE_SELECTED_TEXT,
