@@ -2,6 +2,8 @@
 
 import requests
 from bs4 import BeautifulSoup
+import importlib
+
 
 api_key = "trnsl.1.1.20190308T130505Z.54bc8184ebd6c2e8.87af28bd612e1abcccc8a24fd7f50bc587b05014"
 yandex_translator_url = "https://translate.yandex.net/api/v1.5/tr.json/translate"
