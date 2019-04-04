@@ -1,0 +1,90 @@
+/* НЕ ПРОВЕРЯЛ РАБОТАЕТ ЛИ С ФУНКЦИЕЙ model_change, 
+ПОСКОЛЬКУ НЕ МОГУ ПОТКЛЮЧИТЬ PYTHON К POSTGRESQL */
+
+
+
+CREATE OR REPLACE FUNCTION num_for_one_frame() RETURNS int LANGUAGE plpgsql AS $$ -- создание переменной
+DECLARE
+  num_for_one_frame int;
+BEGIN
+  num_for_one_frame := 5;
+  RETURN num_for_one_frame;
+END
+$$;
+
+CREATE LANGUAGE plpythonu; -- create language if does not exist, ВЫДАЁТ ОШИБКУ!!!
+
+CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER, k INTEGER) -- исполнение analysis.py
+	RETURNS void AS
+	$BODY$
+	import psycopg2
+	import json
+	import sys
+	from datetime import datetime as dt
+
+	i = 10
+
+	def analysis(webpage_id, k = 2, db = 'zumamotu', user = 'MaximZubkov', password='maxTBMzu', host='localhost', port='1234'):
+		SELECT_RECENT_k_RECORDS = ''' SELECT * FROM data
+									  WHERE webpage_id = {}
+									  ORDER BY ts 
+									  DESC LIMIT {}'''.format(webpage_id, k)
+		with psycopg2.connect(dbname=db, user=user, password=password, host=host, port=port) as conn:
+			with conn.cursor() as cursor:
+				cursor.execute(SELECT_RECENT_k_RECORDS)
+				tmp = cursor.fetchall()
+				print(tmp)
+				if tmp:
+					print(webpage_id, " ", k)
+					model = "h"
+					UPDATE_MODEL = '''UPDATE webpage SET model = '{}'
+									  WHERE id = {};'''.format(str(model), webpage_id)
+					cursor.execute(UPDATE_MODEL)
+					conn.commit()
+				else:
+					retrun -1
+
+
+	if __name__ == "__main__":
+		if len(sys.argv) == 3:
+			webpage_id = sys.argv[1]
+			k = sys.argv[2]
+			analysis(webpage_id, k)
+		if len(sys.argv) == 8:
+			webpage_id = sys.argv[1]
+			k = sys.argv[2]
+			db = sys.argv[3]
+			user = sys.argv[4]
+			password = sys.argv[5]
+			host = sys.argv[6]
+			port = sys.argv[7]
+			analysis(webpage_id, k, db, user, password, host, port)
+	$BODY$
+LANGUAGE plpythonu;
+
+-- CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER, k INTEGER) -- short variant
+--   RETURNS void AS
+--   $BODY$
+--   import subprocess
+--   subprocess.call(['/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py, str(webpage_id), str(k)'])
+
+--   $BODY$
+-- LANGUAGE plpythonu;
+
+
+
+-- DROP TRIGGER IF EXISTS insert_lim ON data
+
+CREATE OR REPLACE FUNCTION trigg_befor_ins() RETURNS trigger AS ' -- для триггера
+BEGIN 
+if(select count(*) FROM data WHERE webpage_id = NEW.webpage_id) >= (select num_for_one_frame())
+	then model_change(NEW.webpage_id, select num_for_one_frame()); -- вызываем analysis.py
+end if;
+return NEW; -- делаем insert
+END; 
+' LANGUAGE  plpgsql;
+
+CREATE TRIGGER insert_lim
+BEFORE INSERT ON data
+FOR EACH ROW 
+EXECUTE PROCEDURE trigg_befor_ins(num_for_one_frame)
