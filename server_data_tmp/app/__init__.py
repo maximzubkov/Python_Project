@@ -14,7 +14,11 @@ def index():
 
 @app.route('/api/get_content', methods=['GET', 'POST'])
 def get_content():
-	content = ("""{}\n\n""".format(request.get_json(force=True))).replace('\'','\"')
+	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
+	if content[0] != '[':
+		content = '[' + content + ']'
+		print(content)
+	content += '\n\n'
 	with open('data_tmp.json','a') as file:
 		file.write(content)
 	return jsonify(content)
