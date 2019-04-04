@@ -11,7 +11,7 @@ CREATE TABLE "webpage" (
 	"url" VARCHAR(255),
 	"model" VARCHAR(255) NOT NULL,
 	"user_id" INTEGER NOT NULL,
-	CONSTRAINT webpage_pk PRIMARY KEY ("id")
+	CONSTRAINT webpage_pk PRIMARY KEY ("id", "webpage")
 ) WITH (
   OIDS=FALSE
 );
@@ -54,6 +54,22 @@ $$import subprocess
 subprocess.call(['/usr/bin/python', '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py', str(webpage_id), str(k)])
 $$ LANGUAGE plpythonu;
 
+
+DROP TRIGGER IF EXISTS insert_lim ON data
+
+CREATE OR REPLACE FUNCTION trigg_befor_ins() RETURNS trigger AS ' -- для триггера
+BEGIN 
+if(select count(*) FROM data WHERE webpage_id = NEW.webpage_id) >= (select num_for_one_frame())
+	then model_change(NEW.webpage_id, select num_for_one_frame()); -- вызываем analysis.py
+end if;
+return NEW; -- делаем insert
+END; 
+' LANGUAGE  plpgsql;
+
+CREATE TRIGGER insert_lim
+BEFORE INSERT ON data
+FOR EACH ROW 
+EXECUTE PROCEDURE trigg_befor_ins(num_for_one_frame)
 
 
 
