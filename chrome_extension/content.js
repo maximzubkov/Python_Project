@@ -17,10 +17,8 @@ function add_chunk_mouse(e) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		data: {
-			positionX: e.clientX,	
-			positionY: e.clientY
-		}
+		positionX: e.clientX,	
+		positionY: e.clientY
 	})
 }
 function add_chunk_scroll() {
@@ -32,9 +30,7 @@ function add_chunk_scroll() {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		data:{
-			scrollPositionY: window.scrollY
-		}
+		scrollPositionY: window.scrollY
 	})
 }
 function add_key_chunk(event) {
@@ -58,11 +54,9 @@ function add_key_chunk(event) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		data: {
-			keypress: event.key,
-			shiftPress:shiftPress,
-			ctrlPress:ctrlPress,
-		}
+		keypress: event.key,
+		shiftPress:shiftPress,
+		ctrlPress:ctrlPress
 	})
 }
 
@@ -77,10 +71,8 @@ function systemInfoPage() {
 		minutes:moment_in.getMinutes(),
 		seconds:moment_in.getSeconds(),
 		miliseconds:moment_in.getMilliseconds(),
-		data: {
-			currentHeight:browserWindowHeight,
-			currentWidth:browserWindowWidth,
-		}
+		currentHeight:browserWindowHeight,
+		currentWidth:browserWindowWidth
 	})
 }
 
@@ -94,9 +86,7 @@ function add_chunk_doubleclick(e) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		data: {
-			event_name:dblclick,
-		}
+		event_name:dblclick
 	})
 }
 
@@ -109,9 +99,7 @@ function add_chunk_selected_text(isSelected) {
 		minutes:moment.getMinutes(),
 		seconds:moment.getSeconds(),
 		miliseconds:moment.getMilliseconds(),
-		data: {
-			selectedText: isSelected
-		}
+		selectedText: isSelected
 	})
 }
 
