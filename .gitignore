@@ -2,4 +2,8 @@
 *.ipynb
 *.crx
 *.pem
+<<<<<<< HEAD
 venv/
+=======
+*.txt
+>>>>>>> 115af61ae676ac9e9f041f242fc44eceb369e186
