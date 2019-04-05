@@ -37,6 +37,7 @@ CREATE TABLE "data" (
 	"currentHeight" FLOAT,
 	"minutes" INTEGER,
 	"seconds" INTEGER,
+	"miliseconds" INTEGER,
 	"keypress" INTEGER,
 	"scrollPositionY" FLOAT,
 	"scrollPositionX" FLOAT,
@@ -67,7 +68,7 @@ DROP TRIGGER IF EXISTS insert_lim ON data
 CREATE OR REPLACE FUNCTION trigg_befor_ins() RETURNS trigger AS ' -- для триггера
 BEGIN 
 if(select count(*) FROM data WHERE webpage_id = NEW.webpage_id) >= (select num_for_one_frame())
-	then model_change(NEW.webpage_id, select num_for_one_frame()); -- вызываем analysis.py
+	then select model_change(NEW.webpage_id, select num_for_one_frame()); -- вызываем analysis.py
 end if;
 return NEW; -- делаем insert
 END; 
@@ -77,3 +78,9 @@ CREATE TRIGGER insert_lim
 BEFORE INSERT ON data
 FOR EACH ROW 
 EXECUTE PROCEDURE trigg_befor_ins(num_for_one_frame)
+
+DELETE FROM data
+DELETE FROM webpage
+DELETE FROM users
+
+COPY data TO '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv' DELIMITER ',' CSV HEADER;
