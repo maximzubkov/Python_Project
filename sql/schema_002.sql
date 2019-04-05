@@ -78,3 +78,9 @@ CREATE TRIGGER insert_lim
 BEFORE INSERT ON data
 FOR EACH ROW 
 EXECUTE PROCEDURE trigg_befor_ins(num_for_one_frame)
+
+DELETE FROM data
+DELETE FROM webpage
+DELETE FROM users
+
+COPY data TO '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv' DELIMITER ',' CSV HEADER;
