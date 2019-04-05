@@ -1,6 +1,7 @@
 /*
 Что в одних коментах "--" нужно раскоментить и по идее должно получиться
 Что в двойных "-- --" просто комментарии
+Исправить язык: "LANGUAGE plpgsql" убрать в одном месте
 */
 
 
@@ -16,20 +17,20 @@ $$;
 -- CREATE LANGUAGE plpythonu; -- create language if does not exist
 -- -- DROP FUNCTION model_change(integer,integer)
 
-CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER, k INTEGER) RETURNS INT LANGUAGE plpgsql AS -- исправить язык "LANGUAGE plpgsql" убрать 
+CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER,inout k INTEGER) RETURNS INT LANGUAGE plpgsql AS -- исправить язык "LANGUAGE plpgsql" убрать 
   $$
--- -- BEGIN
--- --	INSERT INTO users VALUES(8,'ShF');
-	import subprocess
-	subprocess.call(['/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py, str(webpage_id), str(k)'])
+-- BEGIN
+-- 	INSERT INTO users VALUES(9,'ShF');
+ 	import subprocess
+ 	subprocess.call(['/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py, str(webpage_id), str(k)'])
 -- -- 	RETURN k;
--- -- END
+-- END
   $$;
 -- LANGUAGE plpythonu;
 
 -- -- select model_change(3, 10)
 
--- -- DROP TRIGGER IF EXISTS insert_lim ON data
+DROP TRIGGER IF EXISTS insert_lim ON data
 
 CREATE OR REPLACE FUNCTION trigg_after_ins() RETURNS trigger AS ' -- для триггера
 DECLARE
