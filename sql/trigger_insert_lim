@@ -8,15 +8,14 @@ BEGIN
 END
 $$;
 
-CREATE LANGUAGE plpythonu; -- create language if does not exist, ВЫДАЁТ ОШИБКУ!!!
+CREATE LANGUAGE plpythonu; -- create language if does not exist
 
-CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER) -- short variant
+CREATE OR REPLACE FUNCTION model_change(webpage_id INTEGER) RETURNS void AS-- short variant
+  $BODY$
 DECLARE
   k int;
 BEGIN
   k := num_for_one_frame();
-  RETURNS void AS
-  $BODY$
   import subprocess
   subprocess.call(['/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis.py, str(webpage_id), str(k)'])
 
