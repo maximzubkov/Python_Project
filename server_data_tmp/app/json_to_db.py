@@ -20,7 +20,7 @@ def get_webpage_id_in_table(table, user_id, url, cursor):
 	else:
 		print ("tupoi polzovatel")
 
-def json_in_db (db = 'zumamotu', user = 'MaximZubkov', password='maxTBMzu', host = "localhost", port='1234', json_file = None , json_str = None):
+def json_in_db (json_file = None , json_str = None):
 
 	"""
 		Закинуть информацию из имеющегося json-файла в базу данных
