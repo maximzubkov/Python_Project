@@ -1,6 +1,15 @@
 from flask import Flask,request, jsonify
 from flask_jsonrpc import JSONRPC
+# import json_to_db
+import psycopg2
 
+
+
+db = 'zumamotu'
+user = 'MaximZubkov'
+password='maxTBMzu'
+host = "localhost"
+port='1234'
 
 
 

@@ -4,3 +4,5 @@
 *.pem
 venv/
 *.txt
+.DS_store
+_pycache__/
