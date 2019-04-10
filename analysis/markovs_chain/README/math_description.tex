@@ -1,0 +1,68 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
+\usepackage{wasysym}
+\usepackage[utf8]{inputenc}
+\usepackage{ tipa }
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+ \usetikzlibrary{calc}
+ \usetikzlibrary{patterns}
+ \usepackage[linguistics]{forest}
+ \usetikzlibrary{decorations.pathreplacing}
+ \usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% Цвета для гиперссылок
+\definecolor{linkcolor}{HTML}{799B03} % цвет ссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+ 
+ 
+
+\title{Примение марковских цепей для распознавания поведения пользователя}
+\author{Зубков Максим, Матвей Турков, 777 группа}
+
+
+\begin{document}
+
+
+\maketitle
+
+\newcommand{\lineann}[5][0.5]{%
+    \begin{scope}[rotate=#2, #5,inner sep=2pt]
+        \draw[dashed, #5!40] (0,0) -- +(0,#1)
+            node [coordinate, near end] (a) {};                       
+        \draw[dashed, #5!20] (#3,0) -- +(0,#1)
+            node [coordinate, near end] (b) {};
+        \draw[|<->|] (a) -- node[fill=white] {#4} (b);
+    \end{scope}
+        
+}
+\maketitle
+
+
+\section{Введение}
+
+Задача заключается в том, чтобы, имея данные о поведении пользователя в сети, определить, является ли данный пользователь владельцем компьютера или же за компьютером сидит самозванец. С помощью $JS$-плагина мы получаем некоторый набор данных $\vec{x}$, содержащий в себе такие данные как усредние за некоторый промежуток времени  скорость и ускорения мыши, скорость печати, адреса $web$-страниц и так далее. Планируется использовать модель основанную на цепях Маркова.
+
+
+\section{Цепи Маркова}
+
+\begin{enumerate}
+
+\item Обычные цепи Маркова. Цепь Маркова - это взвешеный граф, переходы между вершинами $u$ и $v$ которого существуют тогда и только тогда, когда пользователь совершал переход между данными вершинами. Вес ребра $(u, v)$ называется веротностью перехода из вершины $u$ в вершину $v$, при этом в момент времени $t$ вероятность перейти из состояния $Q_i$ в состояние $Q_j$ зависит только от веса ребра $(u,v)$ $P(q_{t} = v | q_{t-1} = v, q_{t-2} = ...) = P(q_{t} = v | q_{t-1} = u)$. 
+
+Граф переходов можно задать матрицей $A$, которая, очевидно обладает следующим свойством: пусть мы имеем некоторое начальное начальное распределение веротностей по вершинам графа $\vec{\pi_0}$, тогда мы можем получить распределе на следущем шаге, $\vec{\pi_1}$, умножив матрицу $A$ справа на $\vec{\pi_0}$, тогда по индукции можно докaзать, что на $n$-ом шаге распределение $\vec{\pi_n} = A^{n}\vec{\pi_0}$. С точки зрения алгоритма будет удобнее разложить матрицу $A$ по базису собственных векторов, чтобы уменьшить трудоемкость возведения в степень. 
+
+\item Скрытые цепи Маркова. 
+
+\end{enumerate}
+\end{document}
+
