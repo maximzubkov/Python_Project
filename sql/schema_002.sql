@@ -30,7 +30,7 @@ CREATE TABLE "users" (
 CREATE TABLE "data" (
 	"id" serial NOT NULL,
 	"webpage_id" INTEGER NOT NULL,
-	"event_type" INTEGER NOT NULL,
+	"type" INTEGER NOT NULL,
 	"positionX" FLOAT,
 	"positionY" FLOAT,
 	"currentWidth" FLOAT,
