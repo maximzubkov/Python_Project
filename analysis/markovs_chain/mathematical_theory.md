@@ -14,3 +14,5 @@ $$\LaTeX$$
 $$\int_\Omega \nabla u \cdot \nabla v~dx = \int_\Omega fv~dx$$
 
 **Theorem**: The translation $[\![e]\!]$ given by
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\sum" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\sum" title="\sum" /></a>
