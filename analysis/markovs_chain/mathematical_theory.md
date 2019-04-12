@@ -12,3 +12,5 @@ $$\LaTeX$$
 }
 
 $$\int_\Omega \nabla u \cdot \nabla v~dx = \int_\Omega fv~dx$$
+
+**Theorem**: The translation $[\![e]\!]$ given by
