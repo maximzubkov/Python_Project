@@ -1,0 +1,62 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
+\usepackage{wasysym}
+\usepackage[utf8]{inputenc}
+\usepackage{ tipa }
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+ \usetikzlibrary{calc}
+ \usetikzlibrary{patterns}
+ \usepackage[linguistics]{forest}
+ \usetikzlibrary{decorations.pathreplacing}
+ \usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+% Цвета для гиперссылок
+\definecolor{linkcolor}{HTML}{799B03} % цвет ссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+ 
+ 
+
+\title{АМВ}
+\author{Зубков Максим, 777 группа}
+
+
+\begin{document}
+
+
+\maketitle
+
+\newcommand{\lineann}[5][0.5]{%
+    \begin{scope}[rotate=#2, #5,inner sep=2pt]
+        \draw[dashed, #5!40] (0,0) -- +(0,#1)
+            node [coordinate, near end] (a) {};                       
+        \draw[dashed, #5!20] (#3,0) -- +(0,#1)
+            node [coordinate, near end] (b) {};
+        \draw[|<->|] (a) -- node[fill=white] {#4} (b);
+    \end{scope}
+        
+}
+\maketitle
+
+
+\section{Алгоритм Баума-Вэлша}
+
+Алгоритм Баума-Велша занимается обучаением скрытой марковской модели (далее СММ). Алгоритм итеративно изменяет модель $\lambda = (A, B, \pi)$  таким образом, чтобы вероятность $P(obs | \lambda)$ была максимальной.
+
+Пусть $\lambda$ - текущая модель, а $\widehat{\lambda}$ - кандидат стать новой моделью, необходимо найти такое $\widehat{\lambda}$, чтобы $P(obs |\widehat{\lambda} ) \geq P(obs, \lambda)$ или, что экивалентно $\log{P(obs |\widehat{\lambda} }) \geq \log {P(obs, \lambda)}$. Введем вспомогательную функцию  $Q(\widehat{\lambda} | \lambda) = \mathbb{E}\left[\log P(obs, S | \widehat{\lambda}) | obs, \lambda\right]$ по определению условного мат ожидания  $\sum_{s} P(S | obs, \lambda) \cdot \log \left[P(obs, S | \widehat{\lambda})\right]$. Можно так же доказать, что задча поиска $\widehat{\lambda} = \argmax\limits_{\lambda} \sum_{s} P(obs, S | \lambda)$ эквивалентна задаче поиска $\argmax\limits_{\lambda} Q(\widehat{\lambda} | \lambda)$
+
+
+\end{document}
+
