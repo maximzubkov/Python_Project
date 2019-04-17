@@ -34,5 +34,5 @@ if __name__ == '__main__':
 	columns = ['type', 'current_page', 'minutes', 'seconds', 'miliseconds', 'selectedText', 'currentHeight', 'currentWidth', 'scrollPositionY', 'scrollPositionX', 'keypress', 'shiftPress', 'ctrlPress', 'positionX', 'positionY']
 	json_insert = Table(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, columns, 'data')
 	app.run(host='127.0.0.1', port= 5000)
-	json_insert.to_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv')
+	# json_insert.to_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv')
 	json_insert.disconnect_db()

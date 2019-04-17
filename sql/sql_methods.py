@@ -1,6 +1,12 @@
 import psycopg2
 import json
 from datetime import datetime as dt
+import sys
+sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
+sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/sql/')
+from personal_constants import *
+from sql_methods import *
+
 
 class DB():
 
@@ -33,6 +39,14 @@ class Table(DB):
 		self.columns = columns
 		self.get_connection()
 		self.get_cursor()
+
+	def get_columns_(self):
+		SELECT_COLUMN = '''SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' and table_name = '{}' and column_default is null'''.format(table)
+		self.cursor.execute(SELECT_COLUMN)
+		self.columns = []
+		for (tmp, ) in self.cursor.fetchall():
+			self.columns.append(tmp)
+		print(self.columns)
 
 	def get_webpage_id_(self, table, user_id, url):
 		SELECT_ID = "SELECT id FROM \"{}\" d WHERE d.url = {} AND d.user_id = {}".format(table, url, user_id)
@@ -76,6 +90,8 @@ class Table(DB):
 									if columns_name in data.keys():
 										if isinstance(data[columns_name], str) :
 											data[columns_name] = '\'' + data[columns_name] + '\''
+										if columns_name == "keypress":
+											data['keypress'] = 1
 									else:
 										data[columns_name] = 'NULL' 
 								
@@ -99,7 +115,6 @@ class Table(DB):
 								except:
 									self.conn.rollback()
 								webpage_id = self.get_webpage_id_('webpage', user_id, data['current_page'])
-
 								INSERT_DATA = '''INSERT INTO "data" ("webpage_id", "type", "positionX", 
 																	 "positionY", "currentWidth", "currentHeight", 
 																	 "minutes", "seconds", "miliseconds", "keypress", 
@@ -108,13 +123,17 @@ class Table(DB):
 																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'])
 								self.cursor.execute(INSERT_DATA)
 								self.conn.commit()
+								# print(data)
 				except:
 					Exception('invalid json')	
 		except:
 			raise Exception('invalid str')
 
-
-
-
+# if __name__ == '__main__':
+# 	columns = ['type', 'current_page', 'minutes', 'seconds', 'miliseconds', 'selectedText', 'currentHeight', 'currentWidth', 'scrollPositionY', 'scrollPositionX', 'keypress', 'shiftPress', 'ctrlPress', 'positionX', 'positionY']
+# 	json_insert = Table(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, columns, 'data')
+# 	with open('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/mishaslivin.json', 'r') as f:
+# 		json_insert.json_in_db(f.read())
+# 	json_insert.disconnect_db()
 
 

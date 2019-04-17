@@ -1,5 +1,5 @@
 var SEND_INTERVAL = 3000; // interval 
-var CAPTURE_INTERVAL = 30;  // interval of capturing a mouse event
+var CAPTURE_INTERVAL = 5;  // interval of capturing a mouse event
 var MAX_SAVED = (1000/CAPTURE_INTERVAL) * (SEND_INTERVAL/1000);
 var CHUNK_TYPE_MOUSE = 0
 var CHUNK_TYPE_KEYBOARD = 1
