@@ -44,6 +44,7 @@ CREATE TABLE "data" (
 	"selectedText" INTEGER,
 	"shiftPress" INTEGER,
 	"ctrlPress" INTEGER,
+	"time_on_page" FLOAT,
 	CONSTRAINT data_pk PRIMARY KEY ("id")
 ) WITH (
   OIDS=FALSE

@@ -163,17 +163,6 @@ var scrollCache = {
 	}
 }
 
-window.onscroll = function(event) {
-	{fetch("http://127.0.0.1:5000/api/get_content", {
-											method: "POST", 
-											body: JSON.stringify(scrollCache.saved)
-												}).then(res => {
-													return null;
-												});
-												scrollCache.clear()
-											}
-}
-
 // TODO
 // chrome.runtime.onMessage.addListener(receiver);
 
@@ -242,7 +231,7 @@ function pageVisit(time_ml) {
 	return({
 		type: CHUNK_TYPE_PAGE_VISIT,
 		current_page:pageVisitCache.saved,
-		miliseconds:time_ml,
+		time_on_page:time_ml,
 		currentHeight:browserWindowHeight,
 		currentWidth:browserWindowWidth
 	})
@@ -268,7 +257,8 @@ var pageVisitCache = {
 		this.time = performance.now()
 	},
 	send_value: function() {
-		onRefresh(performance.now() - this.time)
+		result = ((performance.now() - this.time) / 1000).toPrecision(4)
+		onRefresh(result)
 	},
 }
 

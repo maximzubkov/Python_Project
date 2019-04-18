@@ -2,10 +2,7 @@ import psycopg2
 import json
 from datetime import datetime as dt
 import sys
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/sql/')
-from personal_constants import *
-from sql_methods import *
+
 
 
 class DB():
@@ -128,8 +125,8 @@ class Table(DB):
 																	 "positionY", "currentWidth", "currentHeight", 
 																	 "minutes", "seconds", "miliseconds", "keypress", 
 																	 "scrollPositionY", "scrollPositionX", "selectedText", 
-																	 "shiftPress", "ctrlPress") 
-																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'])
+																	 "shiftPress", "ctrlPress","time_on_page") 
+																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},{});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'],data['time_on_page'])
 								self.cursor.execute(INSERT_DATA)
 								self.conn.commit()
 				except:

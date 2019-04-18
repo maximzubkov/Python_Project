@@ -5,4 +5,5 @@
 venv/
 *.txt
 .DS_store
-_pycache__/
+*/_pycache__/
+config.py
