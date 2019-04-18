@@ -7,6 +7,7 @@ var CHUNK_TYPE_SCROLL = 2
 var GENERAL_INFO = 3
 var CHUNK_TYPE_DOUBLECLICK = 4
 var CHUNK_TYPE_SELECTED_TEXT = 5
+var CHUNK_TYPE_PAGE_VISIT = 6
 
 function add_chunk_mouse(e) {
 	moment = new Date();
@@ -121,7 +122,7 @@ var mouseCache = {
 			  },
 			  body: JSON.stringify(this.saved)
 			}).then(res => {
-			  console.log("Request complete! response:", res.body);
+			  return null
 			});
 			this.cacheFull == true //TODO cacheFULL flag
 			this.saved = []
@@ -156,7 +157,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(keyBoardCache.saved)
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});
 										keyBoardCache.clear()},3000)
 
@@ -171,7 +172,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(scrollCache.saved)
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});
 											scrollCache.clear()},3000)
 
@@ -191,7 +192,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(systemInfoPage())
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});},5000)
 
 // TODO
@@ -219,7 +220,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(doubleClickCache.saved)
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});doubleClickCache.clear()},5000)
 
 var selectedTextCache = {
@@ -253,7 +254,45 @@ setInterval(function() {
 										method: "POST", 
 										body: JSON.stringify(add_chunk_selected_text(checkSelected()))
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											})}},200)
+
+function pageVisit(time_ml) {
+	return({
+		type: CHUNK_TYPE_PAGE_VISIT,
+		current_page:pageVisitCache.saved,
+		miliseconds:time_ml
+	})
+}
+
+function onRefresh(time_ml) {
+	fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(pageVisit(time_ml))
+											}).then(res => {
+												return null;
+											})
+}
+
+var pageVisitCache = {
+	saved:[],
+	time:[],
+	clear: function() {
+		this.saved = ""
+	},
+	add: function(income) {
+		this.saved = income
+		this.time = performance.now()
+	},
+	send_value: function() {
+		onRefresh(performance.now() - this.time)
+	},
+}
+
+window.onload = pageVisitCache.add(document.location.href);
+window.addEventListener('beforeunload', function(event) {
+   pageVisitCache.send_value()
+ });
+
 
 
