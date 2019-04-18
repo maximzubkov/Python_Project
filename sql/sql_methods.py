@@ -58,6 +58,15 @@ class Table(DB):
 		else:
 			return web_id
 
+	def count_varience_mouse(self):#TODO
+		pass
+
+	def count_varience_keyboard(self):#TODO
+		pass
+
+	def insert_new_observation(self):#TODO
+		pass
+
 	def to_csv(self, path):
 		with open(path, 'a+') as file:
 			self.cursor.copy_to(file, self.table, sep=',', null='NaN')
@@ -123,11 +132,10 @@ class Table(DB):
 																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'])
 								self.cursor.execute(INSERT_DATA)
 								self.conn.commit()
-								# print(data)
 				except:
 					Exception('invalid json')	
 		except:
 			raise Exception('invalid str')
-			
+
 
 
