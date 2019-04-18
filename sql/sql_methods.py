@@ -128,12 +128,6 @@ class Table(DB):
 					Exception('invalid json')	
 		except:
 			raise Exception('invalid str')
-
-# if __name__ == '__main__':
-# 	columns = ['type', 'current_page', 'minutes', 'seconds', 'miliseconds', 'selectedText', 'currentHeight', 'currentWidth', 'scrollPositionY', 'scrollPositionX', 'keypress', 'shiftPress', 'ctrlPress', 'positionX', 'positionY']
-# 	json_insert = Table(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, columns, 'data')
-# 	with open('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/mishaslivin.json', 'r') as f:
-# 		json_insert.json_in_db(f.read())
-# 	json_insert.disconnect_db()
+			
 
 
