@@ -2,10 +2,7 @@ import psycopg2
 import json
 from datetime import datetime as dt
 import sys
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/sql/')
-from personal_constants import *
-from sql_methods import *
+
 
 
 class DB():
@@ -57,6 +54,15 @@ class Table(DB):
 			Exception('no id found')	
 		else:
 			return web_id
+
+	def count_varience_mouse(self):#TODO
+		pass
+
+	def count_varience_keyboard(self):#TODO
+		pass
+
+	def insert_new_observation(self):#TODO
+		pass
 
 	def to_csv(self, path):
 		with open(path, 'a+') as file:
@@ -119,21 +125,14 @@ class Table(DB):
 																	 "positionY", "currentWidth", "currentHeight", 
 																	 "minutes", "seconds", "miliseconds", "keypress", 
 																	 "scrollPositionY", "scrollPositionX", "selectedText", 
-																	 "shiftPress", "ctrlPress") 
-																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'])
+																	 "shiftPress", "ctrlPress","time_on_page") 
+																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},{});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'],data['time_on_page'])
 								self.cursor.execute(INSERT_DATA)
 								self.conn.commit()
-								# print(data)
 				except:
 					Exception('invalid json')	
 		except:
 			raise Exception('invalid str')
 
-# if __name__ == '__main__':
-# 	columns = ['type', 'current_page', 'minutes', 'seconds', 'miliseconds', 'selectedText', 'currentHeight', 'currentWidth', 'scrollPositionY', 'scrollPositionX', 'keypress', 'shiftPress', 'ctrlPress', 'positionX', 'positionY']
-# 	json_insert = Table(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, columns, 'data')
-# 	with open('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/mishaslivin.json', 'r') as f:
-# 		json_insert.json_in_db(f.read())
-# 	json_insert.disconnect_db()
 
 
