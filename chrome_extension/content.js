@@ -4,7 +4,6 @@ var MAX_SAVED = (1000/CAPTURE_INTERVAL) * (SEND_INTERVAL/1000);
 var CHUNK_TYPE_MOUSE = 0
 var CHUNK_TYPE_KEYBOARD = 1
 var CHUNK_TYPE_SCROLL = 2
-var GENERAL_INFO = 3
 var CHUNK_TYPE_DOUBLECLICK = 4
 var CHUNK_TYPE_SELECTED_TEXT = 5
 var CHUNK_TYPE_PAGE_VISIT = 6
@@ -58,22 +57,6 @@ function add_key_chunk(event) {
 		keypress: event.key,
 		shiftPress:shiftPress,
 		ctrlPress:ctrlPress
-	})
-}
-
-function systemInfoPage() {
-	moment_in = new Date();
-	browserWindowHeight = window.outerHeight;
-	browserWindowWidth = window.outerWidth;
-	site_url = document.location.href
-	return({
-		type: GENERAL_INFO,
-		current_page:site_url,
-		minutes:moment_in.getMinutes(),
-		seconds:moment_in.getSeconds(),
-		miliseconds:moment_in.getMilliseconds(),
-		currentHeight:browserWindowHeight,
-		currentWidth:browserWindowWidth
 	})
 }
 
@@ -168,13 +151,6 @@ document.addEventListener("scroll",function onScroll(event) {
 	scrollCache.add(add_chunk_scroll())
 });
 
-setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
-										method: "POST", 
-										body: JSON.stringify(scrollCache.saved)
-											}).then(res => {
-												return null;
-											});
-											scrollCache.clear()},3000)
 
 var scrollCache = {
 	saved:[],
@@ -187,13 +163,16 @@ var scrollCache = {
 	}
 }
 
-
-setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
-										method: "POST", 
-										body: JSON.stringify(systemInfoPage())
-											}).then(res => {
-												return null;
-											});},5000)
+window.onscroll = function(event) {
+	{fetch("http://127.0.0.1:5000/api/get_content", {
+											method: "POST", 
+											body: JSON.stringify(scrollCache.saved)
+												}).then(res => {
+													return null;
+												});
+												scrollCache.clear()
+											}
+}
 
 // TODO
 // chrome.runtime.onMessage.addListener(receiver);
@@ -258,10 +237,14 @@ setInterval(function() {
 											})}},200)
 
 function pageVisit(time_ml) {
+	browserWindowHeight = window.outerHeight;
+	browserWindowWidth = window.outerWidth;
 	return({
 		type: CHUNK_TYPE_PAGE_VISIT,
 		current_page:pageVisitCache.saved,
-		miliseconds:time_ml
+		miliseconds:time_ml,
+		currentHeight:browserWindowHeight,
+		currentWidth:browserWindowWidth
 	})
 }
 
