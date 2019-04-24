@@ -4,9 +4,9 @@ var MAX_SAVED = (1000/CAPTURE_INTERVAL) * (SEND_INTERVAL/1000);
 var CHUNK_TYPE_MOUSE = 0
 var CHUNK_TYPE_KEYBOARD = 1
 var CHUNK_TYPE_SCROLL = 2
-var GENERAL_INFO = 3
 var CHUNK_TYPE_DOUBLECLICK = 4
 var CHUNK_TYPE_SELECTED_TEXT = 5
+var CHUNK_TYPE_PAGE_VISIT = 6
 
 function add_chunk_mouse(e) {
 	moment = new Date();
@@ -60,22 +60,6 @@ function add_key_chunk(event) {
 	})
 }
 
-function systemInfoPage() {
-	moment_in = new Date();
-	browserWindowHeight = window.outerHeight;
-	browserWindowWidth = window.outerWidth;
-	site_url = document.location.href
-	return({
-		type: GENERAL_INFO,
-		current_page:site_url,
-		minutes:moment_in.getMinutes(),
-		seconds:moment_in.getSeconds(),
-		miliseconds:moment_in.getMilliseconds(),
-		currentHeight:browserWindowHeight,
-		currentWidth:browserWindowWidth
-	})
-}
-
 function add_chunk_doubleclick(e) {
 	moment = new Date();
 	site_url = document.location.href
@@ -121,7 +105,7 @@ var mouseCache = {
 			  },
 			  body: JSON.stringify(this.saved)
 			}).then(res => {
-			  console.log("Request complete! response:", res.body);
+			  return null
 			});
 			this.cacheFull == true //TODO cacheFULL flag
 			this.saved = []
@@ -156,7 +140,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(keyBoardCache.saved)
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});
 										keyBoardCache.clear()},3000)
 
@@ -167,13 +151,6 @@ document.addEventListener("scroll",function onScroll(event) {
 	scrollCache.add(add_chunk_scroll())
 });
 
-setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
-										method: "POST", 
-										body: JSON.stringify(scrollCache.saved)
-											}).then(res => {
-												console.log("Request complete! response:", res.body);
-											});
-											scrollCache.clear()},3000)
 
 var scrollCache = {
 	saved:[],
@@ -185,14 +162,6 @@ var scrollCache = {
 		this.saved.push(income)
 	}
 }
-
-
-setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
-										method: "POST", 
-										body: JSON.stringify(systemInfoPage())
-											}).then(res => {
-												console.log("Request complete! response:", res.body);
-											});},5000)
 
 // TODO
 // chrome.runtime.onMessage.addListener(receiver);
@@ -219,7 +188,7 @@ setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
 										method: "POST", 
 										body: JSON.stringify(doubleClickCache.saved)
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											});doubleClickCache.clear()},5000)
 
 var selectedTextCache = {
@@ -253,7 +222,50 @@ setInterval(function() {
 										method: "POST", 
 										body: JSON.stringify(add_chunk_selected_text(checkSelected()))
 											}).then(res => {
-												console.log("Request complete! response:", res.body);
+												return null;
 											})}},200)
+
+function pageVisit(time_ml) {
+	browserWindowHeight = window.outerHeight;
+	browserWindowWidth = window.outerWidth;
+	return({
+		type: CHUNK_TYPE_PAGE_VISIT,
+		current_page:pageVisitCache.saved,
+		time_on_page:time_ml,
+		currentHeight:browserWindowHeight,
+		currentWidth:browserWindowWidth
+	})
+}
+
+function onRefresh(time_ml) {
+	fetch("http://127.0.0.1:5000/api/get_content", {
+										method: "POST", 
+										body: JSON.stringify(pageVisit(time_ml))
+											}).then(res => {
+												return null;
+											})
+}
+
+var pageVisitCache = {
+	saved:[],
+	time:[],
+	clear: function() {
+		this.saved = ""
+	},
+	add: function(income) {
+		this.saved = income
+		this.time = performance.now()
+	},
+	send_value: function() {
+		result = ((performance.now() - this.time) / 1000).toPrecision(4)
+		onRefresh(result)
+	},
+}
+
+window.onload = pageVisitCache.add(document.location.href);
+window.addEventListener('beforeunload', function(event) {
+   pageVisitCache.send_value()
+ });
+
 
 
