@@ -26,6 +26,17 @@ CREATE TABLE "users" (
   OIDS=FALSE
 );
 
+CREATE TABLE "transition" (
+	-- TODO
+) WITH (
+  OIDS=FALSE
+);
+
+CREATE TABLE "emission" (
+	-- TODO
+) WITH (
+  OIDS=FALSE
+);
 
 
 CREATE TABLE "data" (
@@ -37,10 +48,6 @@ CREATE TABLE "data" (
 	"minutes" INTEGER,
 	"seconds" INTEGER,
 	"miliseconds" INTEGER,
-	"keypress" INTEGER,
-	"shiftPress" INTEGER,
-	"ctrlPress" INTEGER,
-	"time_on_page" FLOAT,
 	CONSTRAINT data_pk PRIMARY KEY ("id")
 ) WITH (
   OIDS=FALSE
