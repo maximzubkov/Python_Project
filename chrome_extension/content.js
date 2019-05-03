@@ -5,7 +5,7 @@ var CHUNK_TYPE_MOUSE = 0
 var CHUNK_TYPE_KEYBOARD = 1
 var CHUNK_TYPE_PAGE_VISIT = 2
 
-
+// TODO  в json также должен быть пользователь
 function add_chunk_mouse(e) {
 	moment = new Date();
 	site_url = document.location.href

@@ -3,13 +3,16 @@ import math as m
 import psycopg2
 import sys
 import numpy as np
+from urllib.parse import urlparse
+
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/markovs_chain/Python')
 from personal_constants import *
-from hmm import *
+# from hmm import *
 
 CHUNK_TYPE_MOUSE = 0
 CHUNK_TYPE_KEYBOARD = 1
+WEBPAGE_TIME = 2
 MAX_EVENTS_SIZE = 3
 MAX_OBS_SIZE = 2
 
@@ -43,13 +46,40 @@ class obs(DB):
 		self.obs = dict()
 
 	def velocity_model_(self, velocity_var):
+		print(velocity_var)
 		return round(velocity_var) % 2
 	def click_model_(self, click_speed_mean):
+		print(click_speed_mean)
 		return round(click_speed_mean) % 2
 	def time_count_(self, data_json):
 		return data_json['minutes'] * 60 + data_json['seconds'] + data_json['miliseconds'] * 0.001
 
-	def user_(self, name = 'maxim'):
+	def get_max_user_id_(self):
+		MAX_ID = '''SELECT MAX(id) FROM "users" '''
+		self.cursor.execute(MAX_ID)
+		[(max_id,),] = self.cursor.fetchall()
+		return max_id
+
+	def get_max_webpage_id_(self, name = 'maxim1'):
+		user_id = self.get_user_id_(name)
+		MAX_ID = '''SELECT MAX(id) FROM "webpage" w WHERE w.user_id = {} '''.format(user_id)
+		self.cursor.execute(MAX_ID)
+		[(max_id,),] = self.cursor.fetchall()
+		if not max_id:
+			return 0	
+		else:
+			return max_id
+
+	def setval_(self, table, max_id):
+		SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
+		
+		try:
+			self.cursor.execute(SETVAL)
+			self.conn.commit()
+		except:
+			self.conn.rollback()
+
+	def user_(self, name = 'maxim1'):
 		INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
 		
 		try:
@@ -57,8 +87,10 @@ class obs(DB):
 			self.conn.commit()
 		except:
 			self.conn.rollback()
-		
-	def get_user_id_(self, name = 'maxim'):
+			max_id = self.get_max_user_id_()
+			self.setval_("users", max_id)
+
+	def get_user_id_(self, name = 'maxim1'):
 		SELECT_USERS_ID = '''SELECT id FROM "users" u WHERE u.name = '{}' '''.format(name)
 		self.cursor.execute(SELECT_USERS_ID)
 		[(user_id,),] = self.cursor.fetchall()
@@ -68,7 +100,10 @@ class obs(DB):
 			return user_id
 
 	def web_page_(self, data_json, user_id):
-		INSERT_WEB = '''INSERT INTO "webpage" (url, model, user_id) VALUES ('{}', '{}', {});'''.format(data_json['current_page'], 'NEMA', user_id)
+		# TODO для многих пользователей
+		web_id = self.get_max_webpage_id_() + 1
+		print(web_id)
+		INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, data_json['current_page'], 'NEMA', user_id, 0)
 		try:
 			self.cursor.execute(INSERT_WEB)
 			self.conn.commit()
@@ -76,7 +111,7 @@ class obs(DB):
 			self.conn.rollback()
 
 	def get_webpage_id_(self, user_id, url):
-		SELECT_ID = '''SELECT id FROM "webpage" d WHERE d.url = '{}' AND d.user_id = {}'''.format(url, user_id)
+		SELECT_ID = '''SELECT id FROM "webpage" w WHERE w.url = '{}' AND w.user_id = {}'''.format(url, user_id)
 		self.cursor.execute(SELECT_ID)
 		[(web_id,),] = self.cursor.fetchall()
 
@@ -99,6 +134,10 @@ class obs(DB):
 				json_data = json.loads('''{}'''.format(string))
 				for event in json_data:
 					if user_id == -1:
+						url = urlparse(event['current_page'])
+						event['current_page'] = url.netloc + url.path
+
+
 						self.user_()
 						user_id = self.get_user_id_()
 
@@ -132,15 +171,29 @@ class obs(DB):
 							self.click_speed[user_id][web_page_id].append(self.time_count_(event) - prev_click_time)
 						
 						prev_click_time = self.time_count_(event)
+					if event['type'] == WEBPAGE_TIME:
+						SELECT_TIME = '''SELECT time_on_page FROM "webpage" w WHERE w.id = {} AND w.user_id = {}'''.format(web_page_id, user_id)
+						self.cursor.execute(SELECT_TIME)
+						[(time,),] = self.cursor.fetchall()
+						print(float(event['time_on_page']) + time)
+						UPDATE_TIME = '''UPDATE "webpage" SET "time_on_page" = {} WHERE "id" = {} AND "user_id" = {}'''.format(time + float(event['time_on_page']), web_page_id, user_id)
+						try:
+							self.cursor.execute(UPDATE_TIME)
+							self.conn.commit()
+						except:
+							self.conn.rollback()
+
+						
 
 			except:
 				Exception('invalid json')	
 		if self.velocity[user_id][web_page_id] and self.click_speed[user_id][web_page_id] and (len(self.velocity[user_id][web_page_id]) + len(self.click_speed[user_id][web_page_id]) > MAX_EVENTS_SIZE):
+			print(user_id, web_page_id)
 			self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 
 				'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
 		if len(self.obs[user_id][web_page_id]) > MAX_OBS_SIZE:
 			pass
-		print(self.obs)
+		# print(self.obs)
 
 
 # o = obs(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
@@ -151,5 +204,6 @@ class obs(DB):
 # s += '\n\n'
 # # print(s)
 # o.add_obs(s)
+
 
 

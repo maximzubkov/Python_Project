@@ -64,9 +64,9 @@ class hmm():
 		self.B = B
 		self.pi = pi
 	
-	def learn(self, obs, epohs = 1):
-		self.epohs = epohs
-		self.baum_welch_(obs, self.epohs)
+	def learn(self, obs, epochs = 1):
+		self.epochs = epochs
+		self.baum_welch_(obs)
 
 	def forward_(self, obs):
 
@@ -131,14 +131,14 @@ class hmm():
 		self.ksi[T - 1, :, :] /= np.sum(self.ksi[T - 1,: ,: ])
 
 
-	def baum_welch_(self, obs, epohs):
+	def baum_welch_(self, obs):
 
 		N = self.A.shape[0]
 		T = len(obs)
 		K = np.shape(self.B)[0]
 		A_old = self.A.copy()
 		B_old = self.B.copy()
-		for _ in range(epohs):
+		for _ in range(self.epochs):
 			self.forward_(obs)
 			self.backward_(obs)
 			self.gamma_(obs)
