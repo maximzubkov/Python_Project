@@ -4,17 +4,20 @@ import psycopg2
 import sys
 import numpy as np
 from urllib.parse import urlparse
+import socket	
 
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/markovs_chain/Python')
 from personal_constants import *
-# from hmm import *
+from hmm import *
 
 CHUNK_TYPE_MOUSE = 0
 CHUNK_TYPE_KEYBOARD = 1
 WEBPAGE_TIME = 2
 MAX_EVENTS_SIZE = 3
 MAX_OBS_SIZE = 2
+LEARN = 1
+PREDICT = 2
 
 class DB():
 	def __init__(self, db, user, password,host,port):
@@ -38,7 +41,7 @@ class DB():
 
 class obs(DB):
 	def __init__(self, db, user, password, host, port):
-		super().__init__(db, user, password,host,port)
+		super().__init__(db, user, password, host, port)
 		self.get_connection()
 		self.get_cursor()
 		self.velocity = dict()
@@ -102,7 +105,6 @@ class obs(DB):
 	def web_page_(self, data_json, user_id):
 		# TODO для многих пользователей
 		web_id = self.get_max_webpage_id_() + 1
-		print(web_id)
 		INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, data_json['current_page'], 'NEMA', user_id, 0)
 		try:
 			self.cursor.execute(INSERT_WEB)
@@ -119,6 +121,13 @@ class obs(DB):
 			Exception('no id found')	
 		else:
 			return web_id
+
+	def get_obs_seq_(self, user_id):
+		obs_seq = []
+		for web_id in self.obs[user_id].keys():
+			for obs in self.obs[user_id][web_id]:
+				obs_seq.append(web_id << 2 + obs['velocity'] << 1 + obs['click'])
+		return obs_seq
 
 	def add_obs(self, json_str):
 		prev_x = -1
@@ -175,7 +184,7 @@ class obs(DB):
 						SELECT_TIME = '''SELECT time_on_page FROM "webpage" w WHERE w.id = {} AND w.user_id = {}'''.format(web_page_id, user_id)
 						self.cursor.execute(SELECT_TIME)
 						[(time,),] = self.cursor.fetchall()
-						print(float(event['time_on_page']) + time)
+						# print(float(event['time_on_page']) + time)
 						UPDATE_TIME = '''UPDATE "webpage" SET "time_on_page" = {} WHERE "id" = {} AND "user_id" = {}'''.format(time + float(event['time_on_page']), web_page_id, user_id)
 						try:
 							self.cursor.execute(UPDATE_TIME)
@@ -191,9 +200,109 @@ class obs(DB):
 			print(user_id, web_page_id)
 			self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 
 				'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
-		if len(self.obs[user_id][web_page_id]) > MAX_OBS_SIZE:
-			pass
+
+		return user_id
+		# class learn(DB):
+		# SELECT = '''SELECT * FROM "hmm" WHERE "user_id" = 1 '''
+		# self.cursor.execute(SELECT)
+		# [(A, B, pi, tmp,),] = self.cursor.fetchall()
+		# print("A", A, "B", B, "pi", pi)
+# 		UPDATE_TEST = '''UPDATE "test" SET "matrix" = array {} WHERE "id" = 1'''.format([[1, 2],[1,8]])
+# 		try:
+# 			self.cursor.execute(UPDATE_TEST)
+# 			self.conn.commit()
+# 		except:
+# 			self.conn.rollback()
+
 		# print(self.obs)
+
+class ClientError(Exception):
+    """Общий класс исключений клиента"""
+    pass
+
+
+class ClientSocketError(ClientError):
+    """Исключение, выбрасываемое клиентом при сетевой ошибке"""
+    pass
+
+
+class ClientProtocolError(ClientError):
+    """Исключение, выбрасываемое клиентом при ошибке протокола"""
+    pass
+
+
+class Client(obs):
+    def __init__(self, host, port, db, db_user, db_password, db_host, db_port, timeout=None):
+        # класс инкапсулирует создание сокета
+        # создаем клиентский сокет, запоминаем объект socke.socket в self 
+        super().__init__(db, db_user, db_password, db_host, db_port)
+        self.host = host
+        self.port = port
+        try:
+            self.connection = socket.create_connection((host, port), timeout)
+        except socket.error as err:
+            raise ClientSocketError("error create connection", err)
+
+    def _read(self):
+        """Метод для чтения ответа сервера"""
+        data = b""
+        # накапливаем буфер, пока не встретим "\n\n" в конце команды
+        while not data.endswith(b"\n\n"):
+            try:
+                data += self.connection.recv(1024)
+                print(data)
+            except socket.error as err:
+                raise ClientSocketError("error recv data", err)
+
+        # не забываем преобразовывать байты в объекты str для дальнейшей работы
+        decoded_data = data.decode()
+
+        status, payload = decoded_data.split("\n", 1)
+
+        # если получили ошибку - бросаем исключение ClientError
+        if status == "error":
+            raise ClientProtocolError(payload)
+
+        return payload
+
+    def put(self, status, json_str):
+        # отправляем запрос команды put
+    	user_id = self.add_obs(json_str)
+    	count = 0
+    	for wp_id in self.obs[user_id].keys():
+    		count += len(self.obs[user_id][wp_id])
+    	if count > MAX_OBS_SIZE:
+    		obs_seq = self.get_obs_seq_(user_id)
+    		print(obs_seq)
+    		for wp_id in self.obs[user_id].keys():
+    			self.obs[user_id][wp_id] = []
+    			self.velocity[user_id][wp_id] = []
+    			self.click_speed[user_id][wp_id] = []
+    		try:
+    			self.connection.sendall(f"{status} {user_id} {obs_seq}\n".encode())
+    		except socket.error as err:
+    			raise ClientSocketError("error send data", err)
+    		# разбираем ответ
+    		print(self._read())
+
+
+    def close(self):
+        try:
+            self.connection.close()
+            self.disconnect_db()
+        except socket.error as err:
+            raise ClientSocketError("error close connection", err)
+
+
+# def _main():
+#     # проверка работы клиента
+#     client = Client("127.0.0.1", 8181, DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
+#     client.put("learn", '''[{"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 58, "miliseconds": 957, "positionX": 632, "positionY": 682}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 39, "positionX": 745, "positionY": 258}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 80, "positionX": 750, "positionY": 197}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 111, "positionX": 682, "positionY": 316}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 120, "positionX": 619, "positionY": 480}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 129, "positionX": 613, "positionY": 505}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 142, "positionX": 604, "positionY": 561}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 158, "positionX": 604, "positionY": 588}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 174, "positionX": 612, "positionY": 614}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 192, "positionX": 651, "positionY": 606}]\n\n''')
+#     client.close()
+
+
+# if __name__ == "__main__":
+#     _main()
 
 
 # o = obs(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
@@ -204,6 +313,7 @@ class obs(DB):
 # s += '\n\n'
 # # print(s)
 # o.add_obs(s)
-
+# h = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, 1)
+# h.hmm_set([[3,4],[6,7]], [[33, 44],[11,454]], [0.8, 0.8])
 
 

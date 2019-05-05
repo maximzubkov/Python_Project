@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pprint import pprint 
 
+
 # TODO: классовая структура
 
 # Представим, что мы переходим только между тремя веб страницами: web_1, web_2 и web_3. Вообще говороя 
@@ -25,39 +26,40 @@ from pprint import pprint
 # в каком именно стостоянии нахоится пользователь, мы можем только рассуждать о наиболее вероятном состоянии соответсвующему
 # пройденному пути
 
-hidden_states = ['good', 'bad']
+# hidden_states = ['good', 'bad']
 
-# Легко понять, что начальное распределение лучше выбрать равновероятным
+# # Легко понять, что начальное распределение лучше выбрать равновероятным
 
-pi = [0.5, 0.5]
+# pi = [0.5, 0.5]
 
-# Изначально матрица переходов между скрытыми состояниями также лучше выбрать такой
+# # Изначально матрица переходов между скрытыми состояниями также лучше выбрать такой
 
-a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)
-a_df.loc[hidden_states[0]] = [0.5, 0.5]
-a_df.loc[hidden_states[1]] = [0.5, 0.5]
+# a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)
+# a_df.loc[hidden_states[0]] = [0.5, 0.5]
+# a_df.loc[hidden_states[1]] = [0.5, 0.5]
 
-print(a_df, "\n\n")
+# print(a_df, "\n\n")
 
-# Создадим теперь матрицу вероятностей наблюдейний, то есть матрицу в которой записаны условные вероятности
-# получить наблюдение o_k^ находиться в состоянии i
-# Матрица имеет размер (M x Q), где M - число скрытых состояний, а Q - число наблюдений. 
+# # Создадим теперь матрицу вероятностей наблюдейний, то есть матрицу в которой записаны условные вероятности
+# # получить наблюдение o_k^ находиться в состоянии i
+# # Матрица имеет размер (M x Q), где M - число скрытых состояний, а Q - число наблюдений. 
 
-observable_states = ['o1', 'o2', 'o3']
+# observable_states = ['o1', 'o2', 'o3']
 
-b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
-b_df.loc[hidden_states[0]] = [0.5, 0.4, 0.1]
-b_df.loc[hidden_states[1]] = [0.1, 0.3, 0.6]
+# b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
+# b_df.loc[hidden_states[0]] = [0.5, 0.4, 0.1]
+# b_df.loc[hidden_states[1]] = [0.1, 0.3, 0.6]
 
-print(b_df, "\n\n")
+# print(b_df, "\n\n")
 
-# Последовательность наблюдений поведения пользователя закодируем числами
+# # Последовательность наблюдений поведения пользователя закодируем числами
 
-observ_map = {'o1':0, 'o2':1, 'o3':2}
-observ = np.array([1,1,2,1,0,1,2,1,0,2,2,0,1,0,1])
+# observ_map = {'o1':0, 'o2':1, 'o3':2}
+# observ = np.array([1,1,2,1,0,1,2,1,0,2,2,0,1,0,1])
+
 
 class hmm():
-	def __init__(self, states,  pi, A, B, delta = 1e-4):
+	def __init__(self,  pi, A, B, delta = 1e-4, states = ['good', 'bad']):
 		self.states = states
 		self.delta = delta
 		self.A = A
@@ -192,20 +194,20 @@ class hmm():
 		print("path:", path)
 		print("T1 ", T1)
 		print("T2 ", T2)
-		return path, T1, T2
+		return path, np.max(T1[:, T - 1])
 
 
-a = a_df.values
-b = b_df.values
+# a = a_df.values
+# b = b_df.values
 
-HMM = hmm(hidden_states, pi, a, b)
-HMM.viterbi(observ)
+# HMM = hmm(hidden_states, pi, a, b)
+# HMM.viterbi(observ)
 
-HMM = hmm(hidden_states, pi, a, b)
-HMM.learn(observ)
-print("A:\n", HMM.A)
-print("B:\n",HMM.B)
-print("pi:\n",HMM.pi)
+# HMM = hmm(hidden_states, pi, a, b)
+# HMM.learn(observ)
+# print("A:\n", HMM.A)
+# print("B:\n",HMM.B)
+# print("pi:\n",HMM.pi)
 
 
 

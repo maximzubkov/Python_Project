@@ -28,14 +28,12 @@ CREATE TABLE "users" (
   OIDS=FALSE
 );
 
-CREATE TABLE "transition" (
-	"matrix" VARCHAR
-) WITH (
-  OIDS=FALSE
-);
-
-CREATE TABLE "emission" (
-	"matrix" VARCHAR
+CREATE TABLE "hmm" (
+	"transition" FLOAT [][],
+	"emission" FLOAT [][],
+	"distribution" FLOAT [],
+	"user_id" INTEGER,
+	CONSTRAINT transition_pk PRIMARY KEY ("user_id")
 ) WITH (
   OIDS=FALSE
 );
@@ -58,6 +56,8 @@ CREATE TABLE "data" (
 ALTER TABLE "webpage" ADD CONSTRAINT "webpage_fk0" FOREIGN KEY ("user_id") REFERENCES "users"("id");
 
 ALTER TABLE "data" ADD CONSTRAINT "data_fk0" FOREIGN KEY ("webpage_id") REFERENCES "webpage"("id");
+
+ALTER TABLE "hmm" ADD CONSTRAINT "hmm_fk0" FOREIGN KEY ("user_id") REFERENCES "users"("id");
 
 CREATE OR REPLACE FUNCTION num_for_one_frame() RETURNS int LANGUAGE plpgsql AS $$
 DECLARE

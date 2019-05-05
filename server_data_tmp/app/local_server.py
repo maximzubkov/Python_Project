@@ -27,13 +27,13 @@ def get_content():
 		if content[0] != '[':
 			content = '[' + content + ']'
 		content += '\n\n'
-		print(content)
-		o.add_obs(content)
+		# print(content)
+		client.put("learn", content);
 	# json_insert.json_in_db(content)
 	return jsonify(content)
 
 if __name__ == '__main__':
-	o = obs(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
+	client = Client("127.0.0.1", 8181, DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
 	app.run(host='127.0.0.1', port= 5000)
 	# json_insert.to_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv')
-	o.disconnect_db()
+	client.close()
