@@ -145,6 +145,7 @@ class hmm():
 			self.backward_(obs)
 			self.gamma_(obs)
 			self.ksi_(obs)
+			print(self.ksi)
 			self.pi = self.gamma[0]
 			for i in range(N):
 				# self.pi[i] = np.sum(self.ksi[0, i, :])
@@ -161,7 +162,9 @@ class hmm():
 			
 			error = (np.abs(self.A - A_old)).max() + (np.abs(self.B - B_old)).max() 
 			if error < self.delta:
+				print("A", self.A, "B", self.B, "pi", self.pi, error)
 				break
+		print("A", self.A, "B", self.B, "pi", self.pi, error)
 
 
 	# Алгоритм Витерби — алгоритм поиска наиболее подходящего списка состояний (называемого путём Витерби), который в контексте цепей Маркова

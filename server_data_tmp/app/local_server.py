@@ -28,7 +28,7 @@ def get_content():
 			content = '[' + content + ']'
 		content += '\n\n'
 		# print(content)
-		client.put("learn", content);
+		client.put(content);
 	# json_insert.json_in_db(content)
 	return jsonify(content)
 

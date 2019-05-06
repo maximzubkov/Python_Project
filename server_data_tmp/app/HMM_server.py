@@ -22,43 +22,55 @@ MAX_EVENTS_SIZE = 3
 MAX_OBS_SIZE = 2
 LEARN = 1
 PREDICT = 2
+LEARNED_ENOUGH = 50
 
 
 class HMM(DB, hmm):
 	def __init__(self, db, user, password, host, port, user_id):
 		DB.__init__(self, db, user, password, host, port)
+		self.get_connection()
+		self.get_cursor()
 		self.user_id = user_id
-		self.hmm_get_()
-		hmm.__init__(self, self.A, self.B, self.pi)
-		print("A", self.A, "B", self.B, "pi", self.pi)
+		A, B, pi = self.hmm_get_()
+		hmm.__init__(self, pi, A, B)
 
-	def hmm_get_(self, user_id):
+	def hmm_get_(self):
 		SELECT_HMM = '''SELECT * FROM "hmm" WHERE "user_id" = {} '''.format(self.user_id)
 		self.cursor.execute(SELECT_HMM)
-		[(self.A, self.B, self.pi, tmp,),] = self.cursor.fetchall()
+		[(A, B, pi, self.status, tmp, ),] = self.cursor.fetchall()
+		return np.array(A), np.array(B), np.array(pi)
 
-	def hmm_update(self, user_id):
-		UPDATE_HMM = '''UPDATE "hmm" SET "transition" = array {}, "emission" = array {}, "distribution" = array {} WHERE "user_id" = {}'''.format(self.A, self.B, self.pi, user_id)
+	def hmm_get_status(self):
+		if self.status > LEARNED_ENOUGH:
+			return PREDICT
+		return LEARN
+	def hmm_update(self, obs_len):
+		print("A", self.A, "B", self.B, "pi", self.pi)
+
+		UPDATE_HMM = '''UPDATE "hmm" SET "transition" = array {}, "emission" = array {}, "distribution" = array {}, "status" = {} WHERE "user_id" = {}'''.format(self.A.tolist(), self.B.tolist(), self.pi.tolist(),  self.status + obs_len, self.user_id)
 		try:
 			self.cursor.execute(UPDATE_HMM)
 			self.conn.commit()
 		except:
 			self.conn.rollback()
-
-	def hmm_set(self, A, B, pi, user_id):
-		SET_HMM = '''UPDATE "hmm" SET "transition" = array {}, "emission" = array {}, "distribution" = array {} WHERE "user_id" = {}'''.format(A, B, pi, user_id)
-		try:
-			self.cursor.execute(SET_HMM)
-			self.conn.commit()
-		except:
-			self.conn.rollback()
 		self.hmm_get_()
-		print("A", self.A, "B", self.B, "pi", self.pi)
+	
+
+	# def hmm_set(self, A = [[0.5, 0.5], [0.5, 0.5]], B = [[0.5, 0.5] for _ in range(100)], pi = [0.5, 0.5], obs_num = 0):
+	# 	SET_HMM = '''UPDATE "hmm" SET "transition" = array {}, "emission" = array {}, "distribution" = array {}, "status" = {} WHERE "user_id" = {}'''.format(A, B, pi, self.status + obs_num, self.user_id)
+	# 	try:
+	# 		self.cursor.execute(SET_HMM)
+	# 		self.conn.commit()
+	# 	except:
+	# 		self.conn.rollback()
+	# 	self.hmm_get_()
+	# 	print("A", self.A, "B", self.B, "pi", self.pi)
 
 	def hmm_learn(self, obs):
 		print(obs)
 		self.learn(obs)
-		self.hmm_update()
+		self.hmm_update(len(obs))
+		print("updated")
 
 	def hmm_predict(self, obs):
 		print(obs)
@@ -74,34 +86,25 @@ class ClientServerProtocol(asyncio.Protocol):
 	
 	def process_data(self, data):
 		print(data)
-		action, user_id, data = data[:-1].split(" ", 2)
+		user_id, data = data[:-1].split(" ", 1)
 		try:
 			user_id = int(user_id)
 			data = ast.literal_eval(data)
 		except:
 			return "error\nwrong data\n\n"
 		res = ""
-		if action == "learn":
-			print("lerning")
-			markov_model = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, user_id)
-			# markov_model.hmm_learn(data)
-			res += "ok\n\n"
-			return res
-        
-        
-		if action == "predict":
-			print("predict")
-			markov_model = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, user_id)
-			# markov_model.hmm_predict(data)
-			res += "ok\n\n"
-			return res
-                
-            
-		if action != "learn" and action != "predict":
-			return "error\nwrong command\n\n"
-            
-        
-    
+		markov_model = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, user_id)
+		if markov_model.hmm_get_status() == PREDICT:
+			print(data)
+			markov_model.hmm_predict(data)
+			print("PREDICT")
+		if markov_model.hmm_get_status() == LEARN:
+			markov_model.hmm_learn(data)
+			print("LEARN")
+		# markov_model.hmm_predict(data)
+		res += "ok\n\n"
+		return res
+
 	def data_received(self, data):
 		resp = self.process_data(data.decode())
 		self.transport.write(resp.encode())

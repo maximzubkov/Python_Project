@@ -63,7 +63,7 @@ class obs(DB):
 		[(max_id,),] = self.cursor.fetchall()
 		return max_id
 
-	def get_max_webpage_id_(self, name = 'maxim1'):
+	def get_max_webpage_id_(self, name = 'maxim'):
 		user_id = self.get_user_id_(name)
 		MAX_ID = '''SELECT MAX(id) FROM "webpage" w WHERE w.user_id = {} '''.format(user_id)
 		self.cursor.execute(MAX_ID)
@@ -82,18 +82,25 @@ class obs(DB):
 		except:
 			self.conn.rollback()
 
-	def user_(self, name = 'maxim1'):
+	def user_(self, name = 'maxim'):
 		INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
-		
 		try:
 			self.cursor.execute(INSERT_USERS)
 			self.conn.commit()
+			user_id = self.get_user_id_(name)
+			print(user_id)
+			INSERT_HMM = '''INSERT INTO "hmm" (transition, emission, distribution, status, user_id) VALUES (array {}, array {}, array {}, 0, {});'''.format([[0.8, 0.2], [0.1, 0.9]], [[0.7 for _ in range(100)], [0.3 for _ in range(100)]] , [0.9, 0.1],  user_id)
+			try:
+				self.cursor.execute(INSERT_HMM)
+				self.conn.commit()
+			except:
+				self.conn.rollback()
 		except:
 			self.conn.rollback()
 			max_id = self.get_max_user_id_()
 			self.setval_("users", max_id)
 
-	def get_user_id_(self, name = 'maxim1'):
+	def get_user_id_(self, name = 'maxim'):
 		SELECT_USERS_ID = '''SELECT id FROM "users" u WHERE u.name = '{}' '''.format(name)
 		self.cursor.execute(SELECT_USERS_ID)
 		[(user_id,),] = self.cursor.fetchall()
@@ -126,7 +133,8 @@ class obs(DB):
 		obs_seq = []
 		for web_id in self.obs[user_id].keys():
 			for obs in self.obs[user_id][web_id]:
-				obs_seq.append(web_id << 2 + obs['velocity'] << 1 + obs['click'])
+				print(web_id, obs['velocity'], obs['click'])
+				obs_seq.append((web_id << 2) + (obs['velocity'] << 1) + obs['click'])
 		return obs_seq
 
 	def add_obs(self, json_str):
@@ -265,7 +273,7 @@ class Client(obs):
 
         return payload
 
-    def put(self, status, json_str):
+    def put(self, json_str):
         # отправляем запрос команды put
     	user_id = self.add_obs(json_str)
     	count = 0
@@ -279,7 +287,7 @@ class Client(obs):
     			self.velocity[user_id][wp_id] = []
     			self.click_speed[user_id][wp_id] = []
     		try:
-    			self.connection.sendall(f"{status} {user_id} {obs_seq}\n".encode())
+    			self.connection.sendall(f"{user_id} {obs_seq}\n".encode())
     		except socket.error as err:
     			raise ClientSocketError("error send data", err)
     		# разбираем ответ

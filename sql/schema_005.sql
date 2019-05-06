@@ -32,6 +32,7 @@ CREATE TABLE "hmm" (
 	"transition" FLOAT [][],
 	"emission" FLOAT [][],
 	"distribution" FLOAT [],
+	"status" INTEGER,
 	"user_id" INTEGER,
 	CONSTRAINT transition_pk PRIMARY KEY ("user_id")
 ) WITH (
