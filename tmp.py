@@ -25,48 +25,54 @@ from pprint import pprint
 # в каком именно стостоянии нахоится пользователь, мы можем только рассуждать о наиболее вероятном состоянии соответсвующему
 # пройденному пути
 
-# hidden_states = ['good', 'bad']
+hidden_states = ['good', 'bad']
 
 # Легко понять, что начальное распределение лучше выбрать равновероятным
 
-# pi = [0.5, 0.5]
+pi = [0.5, 0.5]
 
 # Изначально матрица переходов между скрытыми состояниями также лучше выбрать такой
 
-# a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)
-# a_df.loc[hidden_states[0]] = [0.5, 0.5]
-# a_df.loc[hidden_states[1]] = [0.5, 0.5]
+a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)
+a_df.loc[hidden_states[0]] = [0.5, 0.5]
+a_df.loc[hidden_states[1]] = [0.5, 0.5]
 
-# print(a_df, "\n\n")
+print(a_df, "\n\n")
 
 # Создадим теперь матрицу вероятностей наблюдейний, то есть матрицу в которой записаны условные вероятности
 # получить наблюдение o_k^ находиться в состоянии i
 # Матрица имеет размер (M x Q), где M - число скрытых состояний, а Q - число наблюдений. 
 
-# observable_states = ['o' + str(i) for i in range(100)]
+observable_states = ['o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'o7']
 
-# b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
-# b_df.loc[hidden_states[0]] = [0.01 for _ in range(100)]
-# b_df.loc[hidden_states[1]] = [0.01 for _ in range(100)]
+b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
+b_df.loc[hidden_states[0]] = [0.5, 0.4, 0.05, 0.02, 0.01, 0.01, 0.01]
+b_df.loc[hidden_states[1]] = [0.1, 0.3, 0.4, 0.17, 0.01, 0.01, 0.01]
 
-# print(b_df, "\n\n")
+print(b_df, "\n\n")
+
+observable_states = ['o' + str(i) for i in range(100)]
+
+b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
+b_df.loc[hidden_states[0]] = [0.01 for _ in range(100)]
+b_df.loc[hidden_states[1]] = [0.01 for _ in range(100)]
 
 # Последовательность наблюдений поведения пользователя закодируем числами
 
-# observ_map = {'o1':0, 'o2':1, 'o3':2, 'o4':3}
-# observ = np.array([1,1,2,1,0,1,2,3,1,30,0,2,2,0,1,0,1,3,3])
+observ_map = {'o1':0, 'o2':1, 'o3':2, 'o4':3, 'o5':4, 'o6':5, 'o7':6}
+observ = np.array([1,1,2,1,0,1,2,1,0,2,2,0,1,0,1,3,3,5])
 
 class hmm():
-	def __init__(self, pi, A, B, delta = 1e-4, states = ['good', 'bad']):
+	def __init__(self, states,  pi, A, B, delta = 1e-4):
 		self.states = states
 		self.delta = delta
 		self.A = A
 		self.B = B
 		self.pi = pi
 	
-	def learn(self, obs, epochs = 1):
-		self.epochs = epochs
-		self.baum_welch_(obs)
+	def learn(self, obs, epohs = 4):
+		self.epohs = epohs
+		self.baum_welch_(obs, self.epohs)
 
 	def forward_(self, obs):
 
@@ -131,14 +137,14 @@ class hmm():
 		self.ksi[T - 1, :, :] /= np.sum(self.ksi[T - 1,: ,: ])
 
 
-	def baum_welch_(self, obs):
+	def baum_welch_(self, obs, epohs):
 
 		N = self.A.shape[0]
 		T = len(obs)
 		K = np.shape(self.B)[1]
 		A_old = self.A.copy()
 		B_old = self.B.copy()
-		for _ in range(self.epochs):
+		for _ in range(epohs):
 			self.forward_(obs)
 			self.backward_(obs)
 			self.gamma_(obs)
@@ -192,17 +198,17 @@ class hmm():
 		print("path:", path)
 		print("T1 ", T1)
 		print("T2 ", T2)
-		return path, T1, T2, np.max(T1[:, T - 1])
+		return path, T1, T2
 
 
-# a = a_df.values
-# b = b_df.values
+a = a_df.values
+b = b_df.values
 
-# HMM = hmm(hidden_states, pi, a, b)
-# HMM.viterbi(observ)
+HMM = hmm(hidden_states, pi, a, b)
+HMM.viterbi(observ)
 
-# HMM = hmm(hidden_states, pi, a, b)
-# HMM.learn(observ)
-# print("A:\n", HMM.A)
-# print("B:\n",HMM.B)
-# print("pi:\n",HMM.pi)
+HMM = hmm(hidden_states, pi, a, b)
+HMM.learn(observ)
+print("A:\n", HMM.A)
+print("B:\n",HMM.B)
+print("pi:\n",HMM.pi)

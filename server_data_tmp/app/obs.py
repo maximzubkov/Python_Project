@@ -15,7 +15,7 @@ CHUNK_TYPE_MOUSE = 0
 CHUNK_TYPE_KEYBOARD = 1
 WEBPAGE_TIME = 2
 MAX_EVENTS_SIZE = 3
-MAX_OBS_SIZE = 2
+MAX_OBS_SIZE = 100
 LEARN = 1
 PREDICT = 2
 
@@ -89,7 +89,7 @@ class obs(DB):
 			self.conn.commit()
 			user_id = self.get_user_id_(name)
 			print(user_id)
-			INSERT_HMM = '''INSERT INTO "hmm" (transition, emission, distribution, status, user_id) VALUES (array {}, array {}, array {}, 0, {});'''.format([[0.8, 0.2], [0.1, 0.9]], [[0.7 for _ in range(100)], [0.3 for _ in range(100)]] , [0.9, 0.1],  user_id)
+			INSERT_HMM = '''INSERT INTO "hmm" (transition, emission, distribution, status, user_id) VALUES (array {}, array {}, array {}, 0, {});'''.format([[0.8, 0.2], [0.1, 0.9]], [[0.01 for _ in range(100)], [0.01 for _ in range(100)]] , [0.9, 0.1],  user_id)
 			try:
 				self.cursor.execute(INSERT_HMM)
 				self.conn.commit()

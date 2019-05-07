@@ -32,6 +32,8 @@ class HMM(DB, hmm):
 		self.get_cursor()
 		self.user_id = user_id
 		A, B, pi = self.hmm_get_()
+		print("A", A, type(A))
+
 		hmm.__init__(self, pi, A, B)
 
 	def hmm_get_(self):
@@ -44,6 +46,7 @@ class HMM(DB, hmm):
 		if self.status > LEARNED_ENOUGH:
 			return PREDICT
 		return LEARN
+
 	def hmm_update(self, obs_len):
 		print("A", self.A, "B", self.B, "pi", self.pi)
 
