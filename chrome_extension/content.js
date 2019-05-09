@@ -11,24 +11,18 @@ chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message) {
 	if (message.value === true) {
-		refreshIntervalId = runExtension()
+		// refreshIntervalId = runExtension()
 		console.log("when status is true"+refreshIntervalId)
 	}
 	else {
 		console.log("when status is false"+refreshIntervalId)
 		onmousemove = console.log("mouse is deactivated")
 		clearInterval(refreshIntervalId);
-		window.removeEventListener('beforeunload',function(){console.log('hello')})
+		onbeforeunload = console.log('page info deactivated')
 		console.log("it is not active")
 	}
 }
 
-window.addEventListener('beforeunload',function(message) {
-	console.log(message.value)
-	if (message.value === true){
-		runExtension()
-	}
-})
 
 function runExtension() {
 
@@ -141,11 +135,9 @@ function runExtension() {
 	}
 
 	window.onload = pageVisitCache.add(document.location.href);
-	window.addEventListener('beforeunload', function(event) {
-	   console.log("sending")
+	onbeforeunload = function(event) {
 	   pageVisitCache.send_value();
-	});
-
+	}
 	return refreshIntervalId
 }
 

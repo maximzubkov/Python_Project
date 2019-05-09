@@ -8,7 +8,7 @@ CREATE LANGUAGE plpythonu;
 
 
 CREATE TABLE "webpage" (
-	"id" INTEGER NOT NULL,
+	"id" INTEGER NOT NULL UNIQUE,
 	"url" VARCHAR(255),
 	"model" VARCHAR(255) NOT NULL,
 	"user_id" INTEGER NOT NULL,
