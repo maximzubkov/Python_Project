@@ -15,7 +15,7 @@ CHUNK_TYPE_MOUSE = 0
 CHUNK_TYPE_KEYBOARD = 1
 WEBPAGE_TIME = 2
 MAX_EVENTS_SIZE = 3
-MAX_OBS_SIZE = 100
+MAX_OBS_SIZE = 10
 LEARN = 1
 PREDICT = 2
 
@@ -89,12 +89,6 @@ class obs(DB):
 			self.conn.commit()
 			user_id = self.get_user_id_(name)
 			print(user_id)
-			INSERT_HMM = '''INSERT INTO "hmm" (transition, emission, distribution, status, user_id) VALUES (array {}, array {}, array {}, 0, {});'''.format([[0.8, 0.2], [0.1, 0.9]], [[0.01 for _ in range(100)], [0.01 for _ in range(100)]] , [0.9, 0.1],  user_id)
-			try:
-				self.cursor.execute(INSERT_HMM)
-				self.conn.commit()
-			except:
-				self.conn.rollback()
 		except:
 			self.conn.rollback()
 			max_id = self.get_max_user_id_()
@@ -134,7 +128,8 @@ class obs(DB):
 		for web_id in self.obs[user_id].keys():
 			for obs in self.obs[user_id][web_id]:
 				print(web_id, obs['velocity'], obs['click'])
-				obs_seq.append((web_id << 2) + (obs['velocity'] << 1) + obs['click'])
+				obs_seq.append(web_id)
+				# obs_seq.append((web_id << 2) + (obs['velocity'] << 1) + obs['click'])
 		return obs_seq
 
 	def add_obs(self, json_str):
@@ -204,11 +199,13 @@ class obs(DB):
 
 			except:
 				Exception('invalid json')	
-		if self.velocity[user_id][web_page_id] and self.click_speed[user_id][web_page_id] and (len(self.velocity[user_id][web_page_id]) + len(self.click_speed[user_id][web_page_id]) > MAX_EVENTS_SIZE):
-			print(user_id, web_page_id)
-			self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 
-				'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
-
+		try:
+			if (self.velocity[user_id][web_page_id] or self.click_speed[user_id][web_page_id]) and (len(self.velocity[user_id][web_page_id]) + len(self.click_speed[user_id][web_page_id]) > MAX_EVENTS_SIZE):
+				print(user_id, web_page_id)
+				self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 
+					'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
+		except:
+			print(json_str)
 		return user_id
 		# class learn(DB):
 		# SELECT = '''SELECT * FROM "hmm" WHERE "user_id" = 1 '''
@@ -273,8 +270,30 @@ class Client(obs):
 
         return payload
 
+    def learn(self, data, user = 'maxim'):
+    	event = []
+    	print(data)
+    	for elem in data:
+    		url = urlparse(elem['url'])
+    		event.append(url.netloc + url.path)
+    	indexing = dict()
+    	i = 0
+    	for e in event[:-1]:
+    		if e not in indexing.keys():
+    			indexing[e] = i
+    			i += 1
+
+    	obs_seq = []
+    	for web_page in event[:-1]:
+    		obs_seq.append(indexing[web_page])
+
+    	user_id = self.get_user_id_(user)
+    	self.connection.sendall(f"learn {user_id} {obs_seq}\n".encode())
+    	print(self._read())
+
     def put(self, json_str):
         # отправляем запрос команды put
+        # иногда ошибается
     	user_id = self.add_obs(json_str)
     	count = 0
     	for wp_id in self.obs[user_id].keys():
@@ -287,11 +306,12 @@ class Client(obs):
     			self.velocity[user_id][wp_id] = []
     			self.click_speed[user_id][wp_id] = []
     		try:
-    			self.connection.sendall(f"{user_id} {obs_seq}\n".encode())
+    			self.connection.sendall(f"predict {user_id} {obs_seq}\n".encode())
     		except socket.error as err:
     			raise ClientSocketError("error send data", err)
     		# разбираем ответ
     		print(self._read())
+    	return -1
 
 
     def close(self):

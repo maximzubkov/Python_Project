@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import networkx as nx
-import math as m
 import matplotlib.pyplot as plt
 from pprint import pprint 
 from urllib.parse import urlparse
@@ -118,13 +117,16 @@ class hmm():
 		T = len(obs)
 
 		self.ksi = np.zeros((T, N, N))
-
+		# print(self.alpha)
+		# print(self.A)
+		# print(self.B)
 		for t in range(T - 1):
 			P = 0
 			for i in range(N):
 				for j in range(N):
 					self.ksi[t, i, j] = self.alpha[t, i] * self.A[i, j] * self.B[j, obs[t + 1]] * self.beta[j, t + 1]
 					P += self.ksi[t, i, j]
+
 			self.ksi[t, :, :] /= P
 			
 		for i in range(N):
@@ -145,11 +147,11 @@ class hmm():
 			self.backward_(obs)
 			self.gamma_(obs)
 			self.ksi_(obs)
-			# self.pi = self.gamma[0]
+			self.pi = self.gamma[0]
 			for i in range(N):
 				self.pi[i] = np.sum(self.ksi[0, i, :])
-				# print("ksi", self.ksi, "alpha", self.alpha, "beta", self.beta, "pi", self.pi)
-
+				print("ksi", self.ksi, "alpha", self.alpha, "beta", self.beta, "pi", self.pi)
+				# return 
 				for j in range(N):
 					self.A[i, j] = np.sum(self.ksi[: T - 1, i, j]) / np.sum(self.gamma[: T - 1, i])
 				
@@ -160,7 +162,7 @@ class hmm():
 						if (obs[t] == k):
 							s += self.gamma[t, i]
 					self.B[i, k] = s / sum(self.gamma[: , i])
-			
+				
 			error = (np.abs(self.A - A_old)).max() + (np.abs(self.B - B_old)).max() 
 			if error < self.delta:
 				break
@@ -196,43 +198,32 @@ class hmm():
 		print("path:", path)
 		print("T1 ", T1)
 		print("T2 ", T2)
-		return path, np.max(T1[:, T - 1])
-# df = pd.read_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/data/matvei_history.csv', sep = ',')
-# # print(df.head())
-# val = df.values
-# event = []
-# for i in range(len(val)):
-# 	url = urlparse(val[i][0])
-# 	event.append(url.netloc + url.path)
-# # print(len(unique))
-# indexing = dict()
-# i = 0
-# for e in event[:-1]:
-# 	if e not in indexing.keys():
-# 		indexing[e] = i
-# 		i += 1
-# # print(indexing)
-# obs_seq = []
-# for web_page in event[:-1]:
-# 	obs_seq.append(indexing[web_page])
-# # print(obs_seq)
-# unique = set(obs_seq)
+		return path, T1, T2, np.max(T1[:, T - 1])
+
+df = pd.read_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/data/matvei_history.csv')
+# print(df.head())
+val = df.values
+event = []
+for i in range(len(val)):
+	url = urlparse(val[i][0])
+	event.append(url.netloc + url.path)
 # print(len(unique))
-# constant = m.sqrt(len(unique))
-# a = constant * np.array([[0.5, 0.5] , [0.5, 0.5]])
-# r_1 = np.random.random(len(unique))
-# r_1 = constant * r_1 / np.sum(r_1)
-# r_2 = np.random.random(len(unique))
-# r_2 = constant * r_2 / np.sum(r_2)
-# b = np.array([r_1, r_2])
-# pi = constant * np.array([0.1, 0.9])
-# a = len(unique) * np.array([[0.5, 0.5] , [0.5, 0.5]]) / 30
-# r_1 = np.random.random(len(unique))
-# r_1 = len(unique) * r_1 / np.sum(r_1) / 30
-# r_2 = np.random.random(len(unique))
-# r_2 = len(unique) * r_2 / np.sum(r_2) / 30
-# b = np.array([r_1, r_2])
-# pi = len(unique) * np.array([0.1, 0.9]) / 30
+indexing = dict()
+i = 0
+for e in event[:-1]:
+	if e not in indexing.keys():
+		indexing[e] = i
+		i += 1
+# print(indexing)
+obs_seq = []
+for web_page in event[:-1]:
+	obs_seq.append(indexing[web_page])
+print(obs_seq)
+unique = set(obs_seq)
+print(len(unique))
+a = np.array([[9, 1] , [1, 9]])
+b = np.array([[10/len(unique) for _ in range(len(unique))], [10/len(unique) for _ in range(len(unique))]])
+pi = np.array([9, 1])
 # url = urlparse(event['current_page'])
 # event['current_page'] = url.netloc + url.path
 # pages = [urlparse()]
@@ -242,22 +233,13 @@ class hmm():
 
 # HMM = hmm(hidden_states, pi, a, b)
 # HMM.viterbi(observ
-# np.seterr(all='ignore')
-# HMM = hmm(pi, a, b)
+np.seterr(all='ignore')
+HMM = hmm(pi, a, b)
 
-# HMM.learn(obs_seq)
-# print("A:\n", HMM.A)
-# print("B:\n",HMM.B)
-# print("pi:\n",HMM.pi)
-
-# a = a_df.values
-# b = b_df.values
-
-# HMM = hmm(hidden_states, pi, a, b)
-# HMM.viterbi(observ)
-
-# HMM = hmm(hidden_states, pi, a, b)
-# HMM.learn(observ)
-# print("A:\n", HMM.A)
-# print("B:\n",HMM.B)
-# print("pi:\n",HMM.pi)
+HMM.learn(obs_seq)
+# HMM.B[0].append(0.5)
+# HMM.B[1].append(0.5)
+# HMM.learn(74)
+print("A:\n", HMM.A)
+print("B:\n",HMM.B)
+print("pi:\n",HMM.pi)
