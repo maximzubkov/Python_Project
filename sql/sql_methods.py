@@ -2,10 +2,7 @@ import psycopg2
 import json
 from datetime import datetime as dt
 import sys
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/sql/')
-from personal_constants import *
-from sql_methods import *
+
 
 
 class DB():
@@ -58,6 +55,15 @@ class Table(DB):
 		else:
 			return web_id
 
+	def count_varience_mouse(self):#TODO
+		pass
+
+	def count_varience_keyboard(self):#TODO
+		pass
+
+	def insert_new_observation(self):#TODO
+		pass
+
 	def to_csv(self, path):
 		with open(path, 'a+') as file:
 			self.cursor.copy_to(file, self.table, sep=',', null='NaN')
@@ -81,59 +87,49 @@ class Table(DB):
 			for string in json_str:
 				try:
 					json_data = json.loads('''{}'''.format(string))
-					if (json_data):
-						for data in json_data:
-							if (data):
-								name = 'maxim'
+					for data in json_data:
+						# print(data)
+						name = 'maxim'
 
-								for columns_name in self.columns:
-									if columns_name in data.keys():
-										if isinstance(data[columns_name], str) :
-											data[columns_name] = '\'' + data[columns_name] + '\''
-										if columns_name == "keypress":
-											data['keypress'] = 1
-									else:
-										data[columns_name] = 'NULL' 
-								
-								INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
-								
-								try:
-									self.cursor.execute(INSERT_USERS)
-									self.conn.commit()
-								except:
-									self.conn.rollback()
-								
-								SELECT_USERS_ID = "SELECT id FROM \"users\" u WHERE u.name = \'{}\'".format(name)
-								self.cursor.execute(SELECT_USERS_ID)
-								[(user_id,),] = self.cursor.fetchall()
-			
-								INSERT_WEB = '''INSERT INTO "webpage" (url, model, user_id) VALUES ({}, '{}', {});'''.format(data['current_page'], 'NEMA', user_id)
-								
-								try:
-									self.cursor.execute(INSERT_WEB)
-									self.conn.commit()
-								except:
-									self.conn.rollback()
-								webpage_id = self.get_webpage_id_('webpage', user_id, data['current_page'])
-								INSERT_DATA = '''INSERT INTO "data" ("webpage_id", "type", "positionX", 
-																	 "positionY", "currentWidth", "currentHeight", 
-																	 "minutes", "seconds", "miliseconds", "keypress", 
-																	 "scrollPositionY", "scrollPositionX", "selectedText", 
-																	 "shiftPress", "ctrlPress") 
-																	 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['currentWidth'], data['currentHeight'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['scrollPositionY'], data['scrollPositionX'], data['selectedText'], data['shiftPress'], data['ctrlPress'])
-								self.cursor.execute(INSERT_DATA)
-								self.conn.commit()
-								# print(data)
+						for columns_name in self.columns:
+							if columns_name in data.keys():
+								if isinstance(data[columns_name], str) :
+									data[columns_name] = '\'' + data[columns_name] + '\''
+								if columns_name == "keypress":
+									data['keypress'] = 1
+							else:
+								data[columns_name] = 'NULL' 
+						
+						INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
+						
+						try:
+							self.cursor.execute(INSERT_USERS)
+							self.conn.commit()
+						except:
+							self.conn.rollback()
+						
+						SELECT_USERS_ID = "SELECT id FROM \"users\" u WHERE u.name = \'{}\'".format(name)
+						self.cursor.execute(SELECT_USERS_ID)
+						[(user_id,),] = self.cursor.fetchall()
+	
+						INSERT_WEB = '''INSERT INTO "webpage" (url, model, user_id) VALUES ({}, '{}', {});'''.format(data['current_page'], 'NEMA', user_id)
+						
+						try:
+							self.cursor.execute(INSERT_WEB)
+							self.conn.commit()
+						except:
+							self.conn.rollback()
+						webpage_id = self.get_webpage_id_('webpage', user_id, data['current_page'])
+						INSERT_DATA = '''INSERT INTO "data" ("webpage_id", "type", "positionX", 
+															 "positionY", 
+															 "minutes", "seconds", "miliseconds", "keypress", 
+															 "selectedText", 
+															 "shiftPress", "ctrlPress", "time_on_page") 
+															 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['shiftPress'], data['ctrlPress'], 'NULL')
+						self.cursor.execute(INSERT_DATA)
+						self.conn.commit()
 				except:
 					Exception('invalid json')	
 		except:
 			raise Exception('invalid str')
-
-# if __name__ == '__main__':
-# 	columns = ['type', 'current_page', 'minutes', 'seconds', 'miliseconds', 'selectedText', 'currentHeight', 'currentWidth', 'scrollPositionY', 'scrollPositionX', 'keypress', 'shiftPress', 'ctrlPress', 'positionX', 'positionY']
-# 	json_insert = Table(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, columns, 'data')
-# 	with open('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/mishaslivin.json', 'r') as f:
-# 		json_insert.json_in_db(f.read())
-# 	json_insert.disconnect_db()
-
 
