@@ -8,7 +8,7 @@ import pandas as pd
 
 
 app = Flask(__name__)
-app.config.from_object(config.DevelopmentMatveyConfig)
+app.config.from_object(config.DevelopmentMaxConfig)
 jsonrpc = JSONRPC(app,'/api')
 
 sys.path.insert(0,app.config['SQL_PATH'])

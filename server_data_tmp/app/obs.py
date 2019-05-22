@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import socket	
 import config 
 
-paths = config.Path('matt')
+paths = config.Path('max')
 sys.path.insert(0, paths.markov_chain())
 
 from hmm import *
@@ -205,8 +205,8 @@ class obs(DB):
 		try:
 			if (self.velocity[user_id][web_page_id] or self.click_speed[user_id][web_page_id]) and (len(self.velocity[user_id][web_page_id]) + len(self.click_speed[user_id][web_page_id]) > MAX_EVENTS_SIZE):
 				print(user_id, web_page_id)
-				self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 
-					'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
+				self.obs[user_id][web_page_id].append({'click': int(self.click_model_(np.array(self.click_speed[user_id][web_page_id]).mean())), 'velocity': int(self.velocity_model_(np.array(self.velocity[user_id][web_page_id]).var()))})
+				print(1111)
 		except:
 			print(json_str)
 		return user_id

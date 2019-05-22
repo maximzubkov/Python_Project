@@ -8,11 +8,14 @@ import socket
 import asyncio
 import ast
 import config
+from __inti__ import app
 
-paths = config.Path('matt')
+paths = config.Path('max')
 sys.path.insert(0, paths.markov_chain())
+sys.path.insert(0, paths.personal_info())
 from hmm import *
 from obs import * 
+
 
 CHUNK_TYPE_MOUSE = 0
 CHUNK_TYPE_KEYBOARD = 1
@@ -113,7 +116,7 @@ class ClientServerProtocol(asyncio.Protocol):
 		except:
 			return "error\nwrong data\n\n"
 		res = ""
-		markov_model = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, user_id)
+		markov_model = HMM(app.config['DB'], app.config['USER'], app.config['PASSWORD'], app.config['HOST'], app.config['PORT'], user_id)
 		print(data)
 		if status == 'predict':
 			markov_model.hmm_predict(data)
