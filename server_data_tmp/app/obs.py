@@ -5,12 +5,11 @@ import sys
 import numpy as np
 from urllib.parse import urlparse
 import socket	
+import config 
 
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/markovs_chain/Python')
-sys.path.insert(0,'/Users/matveyturkov/Python_Project/personal_info')
-sys.path.insert(0,'/Users/matveyturkov/Python_Project/analysis/markovs_chain/Python')
-from personal_constants import *
+paths = config.Path('matt')
+sys.path.insert(0, paths.markov_chain())
+
 from hmm import *
 
 CHUNK_TYPE_MOUSE = 0

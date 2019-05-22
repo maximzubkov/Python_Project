@@ -7,9 +7,10 @@ from urllib.parse import urlparse
 import socket	
 import asyncio
 import ast
+import config
 
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/markovs_chain/Python')
-sys.path.insert(0,'/Users/matveyturkov/Python_Project/analysis/markovs_chain/Python/')
+paths = config.Path('matt')
+sys.path.insert(0, paths.markov_chain())
 from hmm import *
 from obs import * 
 

@@ -14,5 +14,6 @@ DB_server = 'zamamotu'
 USER_server = 'admin'
 PASSWORD_server = 'AhOJxy0uDf1T'
 HOST_server = "89.208.84.245"
+PORT_server = ""
 
 
