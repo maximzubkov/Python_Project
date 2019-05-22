@@ -2,9 +2,8 @@
 *.ipynb
 *.crx
 *.pem
-*.csv
 venv/
 *.txt
 .DS_store
-*/__pycache__/
-config.py
+*/_pycache__/
+personal_constants.py

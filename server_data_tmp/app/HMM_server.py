@@ -8,10 +8,8 @@ import socket
 import asyncio
 import ast
 
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/personal_info')
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/markovs_chain/Python')
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/server_data_tmp/app')
-from personal_constants import *
+sys.path.insert(0,'/Users/matveyturkov/Python_Project/analysis/markovs_chain/Python/')
 from hmm import *
 from obs import * 
 
