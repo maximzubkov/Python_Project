@@ -68,6 +68,13 @@ class Table(DB):
 		with open(path, 'a+') as file:
 			self.cursor.copy_to(file, self.table, sep=',', null='NaN')
 
+	# def history_to_db(self,data):
+	# 	for line in data:
+	# 		url = line['url']
+	# 		moment = line['moment']
+	# 		user_id = 1
+	# 		INSERT_HISTORY = '''INSERT INTO 'history' (url,user_id,time_moment) VALUES ({},{},{})'''.format(url,user_id,moment)
+
 
 	def json_in_db (self, json_str):
 
@@ -75,7 +82,6 @@ class Table(DB):
 			Закинуть информацию из имеющегося json-файла в базу данных
 			TODO: тесты
 		"""
-
 		try:
 			if self.cursor.closed == True:
 				raise Exception('closed coursor')
@@ -101,7 +107,6 @@ class Table(DB):
 								data[columns_name] = 'NULL' 
 						
 						INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
-						
 						try:
 							self.cursor.execute(INSERT_USERS)
 							self.conn.commit()
@@ -111,9 +116,9 @@ class Table(DB):
 						SELECT_USERS_ID = "SELECT id FROM \"users\" u WHERE u.name = \'{}\'".format(name)
 						self.cursor.execute(SELECT_USERS_ID)
 						[(user_id,),] = self.cursor.fetchall()
-	
+						print("id is {} \n".format(user_id))
 						INSERT_WEB = '''INSERT INTO "webpage" (url, model, user_id) VALUES ({}, '{}', {});'''.format(data['current_page'], 'NEMA', user_id)
-						
+						print(INSERT_WEB)
 						try:
 							self.cursor.execute(INSERT_WEB)
 							self.conn.commit()
@@ -127,6 +132,7 @@ class Table(DB):
 															 "shiftPress", "ctrlPress", "time_on_page") 
 															 VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});'''.format(webpage_id, data['type'], data['positionX'], data['positionY'], data['minutes'], data['seconds'], data['miliseconds'], data['keypress'], data['shiftPress'], data['ctrlPress'], 'NULL')
 						self.cursor.execute(INSERT_DATA)
+						print(INSERT_DATA)
 						self.conn.commit()
 				except:
 					Exception('invalid json')	
