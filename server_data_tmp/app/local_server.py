@@ -39,7 +39,6 @@ def get_content():
 		content += '\n\n'
 		# print(content)
 		client.put(content)
-	# json_insert.json_in_db(content)
 	return jsonify(content)
 
 if __name__ == '__main__':
