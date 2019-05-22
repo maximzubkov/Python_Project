@@ -10,18 +10,56 @@ var CHUNK_TYPE_PAGE_VISIT = 2
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message) {
-	if (message.value === true) {
-		refreshIntervalId = runExtension()
-		console.log("when status is true"+refreshIntervalId)
+	sessionStorage.setItem('ZamamotuStatus', message.value)
+	chromeDataStore = {
+		'ZamamotuStatus' : message.value
+	}
+	chrome.storage.sync.set({"key":chromeDataStore}, function() {
+		console.log('chr storage set ' + chromeDataStore)
+	})
+	let zamamotuStatus = sessionStorage.getItem('ZamamotuStatus')
+	if (zamamotuStatus === 'true') {
+		let refreshIntervalId = runExtension()
+		refreshKey = "refreshKey"
+		refreshIntervalIdData = {
+			'refreshIntervalId' : refreshIntervalId
+		}
+		chrome.storage.sync.set({refreshKey:refreshIntervalIdData})
+		console.log("when status is true "+refreshIntervalId)
 	}
 	else {
-		console.log("when status is false"+refreshIntervalId)
 		onmousemove = console.log("mouse is deactivated")
-		clearInterval(refreshIntervalId);
+		chrome.storage.sync.get("refreshKey", function (obj) {
+			let refreshIntervalId = Number(obj['refreshKey']['refreshIntervalId'])
+			clearInterval(refreshIntervalId);
+		})
 		onbeforeunload = console.log('page info deactivated')
 		console.log("it is not active")
+		chrome.storage.sync.clear();
 	}
 }
+// chrome.storage.sync.set({: value}, function() {
+//           console.log('Value is set to ' + value);
+//         });
+      
+// chrome.storage.sync.get(['key'], function(result) {
+//           console.log('Value currently is ' + result.key);
+//         });
+
+onload = function(event) {
+	chrome.storage.sync.get("key", function (obj) {
+		let extensionStatus = obj['key']['ZamamotuStatus']
+		if (extensionStatus === true)  {
+			runExtension();
+		}})
+	};
+	// ,function(result) {
+	// 	if (result.key === 'true') {
+	// 		console.log('got data from storage')
+	// 		runExtension()
+	// 	}
+	// 	console.log("res is " + result.key)
+	// })
 
 
 function runExtension() {

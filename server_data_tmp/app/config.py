@@ -20,6 +20,7 @@ class DevelopmentMatveyConfig(Config):
 	SQL_PATH = '/Users/matveyturkov/Python_Project/sql'
 	SCRIPTS_PATH = '/Users/matveyturkov/Python_Project/scripts/'
 	HISTORY_PATH = '../../analysis/data/matvei_history.csv'
+	CLIENT_CLASS = '/Users/matveyturkov/Python_Project/server_data_tmp/app/'
 
 
 class ProductionConfig(Config):
