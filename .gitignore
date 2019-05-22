@@ -2,8 +2,9 @@
 *.ipynb
 *.crx
 *.pem
+*.csv
 venv/
 *.txt
 .DS_store
-*/_pycache__/
+*/__pycache__/
 config.py
