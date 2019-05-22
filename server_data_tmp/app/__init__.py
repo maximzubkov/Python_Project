@@ -24,8 +24,8 @@ def index():
 @app.route('/api/get_history', methods=['GET', 'POST'])
 def get_history():
 	content = request.get_json(force=True)
-	filepath = '../../analysis/data/matvei_history.csv'
-	insert_history_to_file(content,filepath) 
+	# filepath = '../../analysis/data/matvei_history.csv'
+	# insert_history_to_file(content,filepath) 
 	return jsonify(200)
 
 @app.route('/api/get_content', methods=['GET', 'POST'])

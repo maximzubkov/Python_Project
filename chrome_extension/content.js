@@ -11,8 +11,8 @@ chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message) {
 	if (message.value === true) {
-		// refreshIntervalId = runExtension()
-		console.log("when status is true"+refreshIntervalId)
+		refreshIntervalId = runExtension()
+	}
 	}
 	else {
 		console.log("when status is false"+refreshIntervalId)
