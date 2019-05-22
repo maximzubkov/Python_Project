@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 import networkx as nx
+import math as m
 import matplotlib.pyplot as plt
 from pprint import pprint 
+from urllib.parse import urlparse
 
 # TODO: классовая структура
 
@@ -143,9 +145,11 @@ class hmm():
 			self.backward_(obs)
 			self.gamma_(obs)
 			self.ksi_(obs)
-			self.pi = self.gamma[0]
+			# self.pi = self.gamma[0]
 			for i in range(N):
-				# self.pi[i] = np.sum(self.ksi[0, i, :])
+				self.pi[i] = np.sum(self.ksi[0, i, :])
+				# print("ksi", self.ksi, "alpha", self.alpha, "beta", self.beta, "pi", self.pi)
+
 				for j in range(N):
 					self.A[i, j] = np.sum(self.ksi[: T - 1, i, j]) / np.sum(self.gamma[: T - 1, i])
 				
@@ -192,8 +196,59 @@ class hmm():
 		print("path:", path)
 		print("T1 ", T1)
 		print("T2 ", T2)
-		return path, T1, T2, np.max(T1[:, T - 1])
+		return path, np.max(T1[:, T - 1])
+# df = pd.read_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/data/matvei_history.csv', sep = ',')
+# # print(df.head())
+# val = df.values
+# event = []
+# for i in range(len(val)):
+# 	url = urlparse(val[i][0])
+# 	event.append(url.netloc + url.path)
+# # print(len(unique))
+# indexing = dict()
+# i = 0
+# for e in event[:-1]:
+# 	if e not in indexing.keys():
+# 		indexing[e] = i
+# 		i += 1
+# # print(indexing)
+# obs_seq = []
+# for web_page in event[:-1]:
+# 	obs_seq.append(indexing[web_page])
+# # print(obs_seq)
+# unique = set(obs_seq)
+# print(len(unique))
+# constant = m.sqrt(len(unique))
+# a = constant * np.array([[0.5, 0.5] , [0.5, 0.5]])
+# r_1 = np.random.random(len(unique))
+# r_1 = constant * r_1 / np.sum(r_1)
+# r_2 = np.random.random(len(unique))
+# r_2 = constant * r_2 / np.sum(r_2)
+# b = np.array([r_1, r_2])
+# pi = constant * np.array([0.1, 0.9])
+# a = len(unique) * np.array([[0.5, 0.5] , [0.5, 0.5]]) / 30
+# r_1 = np.random.random(len(unique))
+# r_1 = len(unique) * r_1 / np.sum(r_1) / 30
+# r_2 = np.random.random(len(unique))
+# r_2 = len(unique) * r_2 / np.sum(r_2) / 30
+# b = np.array([r_1, r_2])
+# pi = len(unique) * np.array([0.1, 0.9]) / 30
+# url = urlparse(event['current_page'])
+# event['current_page'] = url.netloc + url.path
+# pages = [urlparse()]
 
+# a = a_df.values
+# b = b_df.values
+
+# HMM = hmm(hidden_states, pi, a, b)
+# HMM.viterbi(observ
+# np.seterr(all='ignore')
+# HMM = hmm(pi, a, b)
+
+# HMM.learn(obs_seq)
+# print("A:\n", HMM.A)
+# print("B:\n",HMM.B)
+# print("pi:\n",HMM.pi)
 
 # a = a_df.values
 # b = b_df.values

@@ -31,21 +31,34 @@ class HMM(DB, hmm):
 		self.get_connection()
 		self.get_cursor()
 		self.user_id = user_id
-		A, B, pi = self.hmm_get_()
-		print("A", A, type(A))
-
-		hmm.__init__(self, pi, A, B)
 
 	def hmm_get_(self):
 		SELECT_HMM = '''SELECT * FROM "hmm" WHERE "user_id" = {} '''.format(self.user_id)
 		self.cursor.execute(SELECT_HMM)
 		[(A, B, pi, self.status, tmp, ),] = self.cursor.fetchall()
-		return np.array(A), np.array(B), np.array(pi)
+		hmm.__init__(self, np.array(pi), np.array(A), np.array(B))
 
 	def hmm_get_status(self):
 		if self.status > LEARNED_ENOUGH:
 			return PREDICT
 		return LEARN
+
+	def hmm_init_(self, unique_obs_len):
+		a = (m.sqrt(unique_obs_len) * np.array([[0.5, 0.5] , [0.5, 0.5]])).tolist()
+		r_1 = np.random.random(unique_obs_len)
+		r_1 = (m.sqrt(unique_obs_len) * r_1 / np.sum(r_1)).tolist()
+		r_2 = np.random.random(unique_obs_len)
+		r_2 = (m.sqrt(unique_obs_len) * r_2 / sum(r_2)).tolist()
+		b = np.array([r_1, r_2]).tolist()
+		pi = (m.sqrt(unique_obs_len) * np.array([0.1, 0.9])).tolist()
+		self.status = 0
+		INSERT_HMM = '''INSERT INTO "hmm" (transition, emission, distribution, status, user_id) VALUES (array {}, array {}, array {}, 0, {});'''.format(a, b, pi, self.user_id)
+		try:
+			self.cursor.execute(INSERT_HMM)
+			self.conn.commit()
+		except:
+			self.conn.rollback()
+		hmm.__init__(self, np.array(pi), np.array(a), np.array(b))
 
 	def hmm_update(self, obs_len):
 		print("A", self.A, "B", self.B, "pi", self.pi)
@@ -71,13 +84,16 @@ class HMM(DB, hmm):
 
 	def hmm_learn(self, obs):
 		print(obs)
+		self.hmm_init_(len(set(obs)))
 		self.learn(obs)
 		self.hmm_update(len(obs))
 		print("updated")
 
 	def hmm_predict(self, obs):
 		print(obs)
+		self.hmm_get_()
 		path, prob = self.viterbi(obs)
+		print(prob)
 
 
 
@@ -88,22 +104,25 @@ class ClientServerProtocol(asyncio.Protocol):
 		self.transport = transport
 	
 	def process_data(self, data):
-		print(data)
-		user_id, data = data[:-1].split(" ", 1)
+		status, user_id, data = data[:-1].split(" ", 2)
+		print(status, user_id)
 		try:
 			user_id = int(user_id)
 			data = ast.literal_eval(data)
+			if status not in ['learn', 'predict']:
+				return "error\nwrong data\n\n"
 		except:
 			return "error\nwrong data\n\n"
 		res = ""
 		markov_model = HMM(DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim, user_id)
-		if markov_model.hmm_get_status() == PREDICT:
-			print(data)
+		print(data)
+		if status == 'predict':
 			markov_model.hmm_predict(data)
 			print("PREDICT")
-		if markov_model.hmm_get_status() == LEARN:
+		if status == 'learn':
 			markov_model.hmm_learn(data)
 			print("LEARN")
+
 		# markov_model.hmm_predict(data)
 		res += "ok\n\n"
 		return res
