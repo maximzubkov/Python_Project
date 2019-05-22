@@ -8,7 +8,8 @@ import socket
 import asyncio
 import ast
 import config
-from __inti__ import app
+from __init__ import app
+
 
 paths = config.Path('max')
 sys.path.insert(0, paths.markov_chain())
