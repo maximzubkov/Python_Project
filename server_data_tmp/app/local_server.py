@@ -1,15 +1,15 @@
-from flask import Flask,request, jsonify
+from flask import Flask, request, jsonify
 from flask_jsonrpc import JSONRPC
 # import json_to_db
 import psycopg2
 import sys
 sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/server_data_tmp/app')
 from obs import *
-
+import config 
 
 app = Flask(__name__)
-jsonrpc = JSONRPC(app,'/api')
 app.config.from_object(config.DevelopmentMaxConfig)
+jsonrpc = JSONRPC(app,'/api')
 
 sys.path.insert(0,app.config['SQL_PATH'])
 from sql_methods import *
