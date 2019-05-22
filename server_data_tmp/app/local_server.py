@@ -1,15 +1,15 @@
-from flask import Flask,request, jsonify
+from flask import Flask, request, jsonify
 from flask_jsonrpc import JSONRPC
 # import json_to_db
 import psycopg2
 import sys
-sys.path.insert(0,'/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/server_data_tmp/app')
 from obs import *
-
+import config 
 
 app = Flask(__name__)
-jsonrpc = JSONRPC(app,'/api')
 app.config.from_object(config.DevelopmentMaxConfig)
+jsonrpc = JSONRPC(app,'/api')
+
 
 sys.path.insert(0,app.config['SQL_PATH'])
 from sql_methods import *
@@ -42,7 +42,7 @@ def get_content():
 	return jsonify(content)
 
 if __name__ == '__main__':
-	client = Client("127.0.0.1", 8181, DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
+	client = Client("127.0.0.1", 8181, app.config['DB'], app.config['USER'], app.config['PASSWORD'], app.config['HOST'], app.config['PORT'])
 	app.run(host='127.0.0.1', port= 5000)
 	# json_insert.to_csv('/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/son.csv')
 	client.close()
