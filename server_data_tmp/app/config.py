@@ -1,33 +1,64 @@
 from flask import Config
+import sys
+
+class Path():
+
+	def __init__(self, name = 'production'):
+		PROD = 'production'
+		MAX = 'maxim'
+		MATT = 'matt'
+		if (name == MATT):
+			self.absolute_path = '/Users/matveyturkov/Python_Project'
+		if (name == MAX):
+			self.absolute_path = '/Users/MaximZubkov/Desktop/Programming/Python_Project'
+		if (name == PROD):
+			self.absolute_path = '/home/ubuntu/Python_Project'
+
+	def personal_info(self):
+		return (self.absolute_path + '/personal_info')
+
+	def markov_chain(self):
+		return (self.absolute_path + '/analysis/markovs_chain/Python')
+
+
+paths = Path('matt')
+sys.path.insert(0, paths.personal_info())
+from personal_constants import *
 
 class DevelopmentMaxConfig(Config):
-	DB = 'zumamotu'
-	USER = 'MaximZubkov'
-	PASSWORD='maxTBMzu'
-	HOST= "localhost"
-	PORT='1234'
+	DB = DB_maxim
+	USER = USER_maxim
+	PASSWORD= PASSWORD_maxim
+	HOST= HOST_maxim
+	PORT=PORT_maxim
 	SQL_PATH = '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/sql/'
 	SCRIPTS_PATH = '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/scripts/'
-	HISTORY_PATH = '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/analysis/data/maxim_history.csv'
 	CLIENT_CLASS = '/Users/MaximZubkov/Desktop/Programming/Python/Python_Project/server_data_tmp/app'
 
 class DevelopmentMatveyConfig(Config):
-	DB = 'quack'
-	USER = 'quack'
-	PASSWORD=''
-	HOST= "localhost"
-	PORT='5432'
+	DB = DB_matvey
+	USER = USER_matvey
+	PASSWORD= PASSWORD_matvey
+	HOST= HOST_matvey
+	PORT=PORT_matvey
 	SQL_PATH = '/Users/matveyturkov/Python_Project/sql'
 	SCRIPTS_PATH = '/Users/matveyturkov/Python_Project/scripts/'
-	HISTORY_PATH = '../../analysis/data/matvei_history.csv'
 	CLIENT_CLASS = '/Users/matveyturkov/Python_Project/server_data_tmp/app/'
 
 
 class ProductionConfig(Config):
-	DB = 'zamamotu'
-	USER = 'admin'
-	PASSWORD = 'AhOJxy0uDf1T'
-	HOST = "89.208.84.245"
-	PORT = None
-	SQL_PATH = '/Users/matveyturkov/Python_Project/sql'
+	DB = DB_server
+	USER = USER_server
+	PASSWORD= PASSWORD_server
+	HOST= HOST_server
+	PORT= None
+	SQL_PATH = '/home/ubuntu/Python_Project/sql'
+	SCRIPTS_PATH = '/home/ubuntu/Python_Project/scripts/'
+	CLIENT_CLASS = '/home/ubuntu/Python_Project/server_data_tmp/app/'
+
+
+
+
+
+
 
