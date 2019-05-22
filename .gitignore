@@ -6,4 +6,4 @@ venv/
 *.txt
 .DS_store
 */_pycache__/
-config.py
+personal_constants.py
