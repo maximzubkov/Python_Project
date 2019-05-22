@@ -51,9 +51,11 @@ class obs(DB):
 	def velocity_model_(self, velocity_var):
 		print(velocity_var)
 		return round(velocity_var) % 2
+		
 	def click_model_(self, click_speed_mean):
 		print(click_speed_mean)
 		return round(click_speed_mean) % 2
+
 	def time_count_(self, data_json):
 		return data_json['minutes'] * 60 + data_json['seconds'] + data_json['miliseconds'] * 0.001
 
@@ -312,7 +314,6 @@ class Client(obs):
     		# разбираем ответ
     		print(self._read())
     	return -1
-
 
     def close(self):
         try:
