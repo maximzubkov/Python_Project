@@ -122,10 +122,11 @@ class ClientServerProtocol(asyncio.Protocol):
 		if status == 'predict':
 			markov_model.hmm_predict(data)
 			print("PREDICT")
+			markov_model.disconnect_db()
 		if status == 'learn':
 			markov_model.hmm_learn(data)
 			print("LEARN")
-
+			markov_model.disconnect_db()
 		# markov_model.hmm_predict(data)
 		res += "ok\n\n"
 		return res
