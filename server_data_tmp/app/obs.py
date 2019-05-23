@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import socket	
 import config 
 
-paths = config.Path('max')
+paths = config.Path('production')
 sys.path.insert(0, paths.markov_chain())
 
 from hmm import *
@@ -115,6 +115,7 @@ class obs(DB):
 			self.conn.commit()
 		except:
 			self.conn.rollback()
+			Exception('webpage') 
 
 	def get_webpage_id_(self, user_id, url):
 		SELECT_ID = '''SELECT id FROM "webpage" w WHERE w.url = '{}' AND w.user_id = {}'''.format(url, user_id)
@@ -273,9 +274,20 @@ class Client(obs):
 
         return payload
 
+    def _insert_web_page(self, url, web_id, user_id):
+    	INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, url, 'NEMA', user_id, 0)
+    	try:
+    		self.cursor.execute(INSERT_WEB)
+    		self.conn.commit()
+    	except:
+    		self.conn.rollback() 
+    		print('web problem')	
+
     def learn(self, data, user = 'maxim'):
     	event = []
     	print(data)
+    	self.user_(user)
+    	user_id = self.get_user_id_(user)
     	for elem in data:
     		url = urlparse(elem['url'])
     		event.append(url.netloc + url.path)
@@ -284,14 +296,14 @@ class Client(obs):
     	for e in event[:-1]:
     		if e not in indexing.keys():
     			indexing[e] = i
+    			self._insert_web_page(e, i, user_id)
     			i += 1
+
 
     	obs_seq = []
     	for web_page in event[:-1]:
     		obs_seq.append(indexing[web_page])
-
-    	user_id = self.get_user_id_(user)
-    	self.connection.sendall(f"learn {user_id} {obs_seq}\n".encode())
+    	self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
     	print(self._read())
 
     def put(self, json_str):
@@ -309,7 +321,7 @@ class Client(obs):
     			self.velocity[user_id][wp_id] = []
     			self.click_speed[user_id][wp_id] = []
     		try:
-    			self.connection.sendall(f"predict {user_id} {obs_seq}\n".encode())
+    			self.connection.sendall("predict {} {}\n".format(user_id, obs_seq).encode())
     		except socket.error as err:
     			raise ClientSocketError("error send data", err)
     		# разбираем ответ

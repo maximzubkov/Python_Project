@@ -4,12 +4,13 @@ import psycopg2
 import sys
 import config
 import pandas as pd
-
+from flask_script import Manager,Server
 
 
 app = Flask(__name__)
-app.config.from_object(config.DevelopmentMaxConfig)
+app.config.from_object(config.ProductionConfig)
 jsonrpc = JSONRPC(app,'/api')
+manager = Manager(app)
 
 sys.path.insert(0,app.config['SQL_PATH'])
 from sql_methods import *
@@ -45,7 +46,17 @@ def get_content():
 	# json_insert.json_in_db(content)
 	return jsonify(content)
 
-if __name__ == '__main__':
+with app.app_context():
 	client = Client("127.0.0.1", 8181, app.config['DB'], app.config['USER'], app.config['PASSWORD'], app.config['HOST'], app.config['PORT'])
-	app.run(host='127.0.0.1', port= 5000)
-	client.close()
+
+#class CustomServer(Server):
+  #  def __call__(self, app, *args, **kwargs):
+ #       client = custom_call()
+        #Hint: Here you could manipulate app
+#        return Server.__call__(self, app)
+
+
+
+
+if __name__ == '__main__':
+	app.run(debug=True)

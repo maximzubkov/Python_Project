@@ -21,7 +21,7 @@ class Path():
 		return (self.absolute_path + '/analysis/markovs_chain/Python')
 
 
-paths = Path('max')
+paths = Path('production')
 sys.path.insert(0, paths.personal_info())
 from personal_constants import *
 

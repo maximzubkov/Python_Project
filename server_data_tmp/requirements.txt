@@ -13,7 +13,6 @@ Flask-Migrate==2.4.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
-hmmlearn==0.2.1.post15+g0ec079e
 idna==2.8
 infinity==1.4
 intervals==0.8.1

