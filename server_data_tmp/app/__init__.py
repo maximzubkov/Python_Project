@@ -11,9 +11,6 @@ app = Flask(__name__)
 app.config.from_object(config.DevelopmentMaxConfig)
 jsonrpc = JSONRPC(app,'/api')
 
-sys.path.insert(0,app.config['SQL_PATH'])
-from sql_methods import *
-
 sys.path.insert(0,app.config['SCRIPTS_PATH'])
 from file_utils import insert_history_to_file
 

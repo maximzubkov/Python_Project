@@ -1,12 +1,4 @@
-*.ipynb_checkpoints
-*.ipynb
-*.crx
-*.pem
-venv/
-*.txt
-.DS_store
-*/_pycache__/
-personal_constants.pyvar SEND_INTERVAL = 3000; // interval 
+var SEND_INTERVAL = 3000; // interval 
 var CAPTURE_INTERVAL = 20;  // interval of capturing a mouse event
 var MAX_SAVED = 10;
 var CHUNK_TYPE_MOUSE = 0
