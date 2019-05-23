@@ -250,7 +250,15 @@ class Client(obs):
             self.connection = socket.create_connection((host, port), timeout)
         except socket.error as err:
             raise ClientSocketError("error create connection", err)
-
+    def _insert_web_page(self, url, web_id, user_id):
+    	INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, url, 'NEMA', user_id, 0)
+    	try:
+    		self.cursor.execute(INSERT_WEB)
+    		self.conn.commit()
+    	except:
+    		self.conn.rollback() 
+    		print('web problem')
+    		 
     def _read(self):
         """Метод для чтения ответа сервера"""
         data = b""
@@ -276,6 +284,7 @@ class Client(obs):
     def learn(self, data, user = 'maxim'):
     	event = []
     	print(data)
+    	user_id = self.get_user_id_(name)
     	for elem in data:
     		url = urlparse(elem['url'])
     		event.append(url.netloc + url.path)
@@ -284,12 +293,14 @@ class Client(obs):
     	for e in event[:-1]:
     		if e not in indexing.keys():
     			indexing[e] = i
+    			self._insert_web_page(e, i, user_id)
     			i += 1
 
     	obs_seq = []
     	for web_page in event[:-1]:
     		obs_seq.append(indexing[web_page])
 
+    	self.user_(user)
     	user_id = self.get_user_id_(user)
     	self.connection.sendall(f"learn {user_id} {obs_seq}\n".encode())
     	print(self._read())
@@ -298,6 +309,8 @@ class Client(obs):
         # отправляем запрос команды put
         # иногда ошибается
     	user_id = self.add_obs(json_str)
+    	a = []
+    	a[4]
     	count = 0
     	for wp_id in self.obs[user_id].keys():
     		count += len(self.obs[user_id][wp_id])

