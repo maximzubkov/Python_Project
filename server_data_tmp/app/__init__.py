@@ -30,6 +30,20 @@ def get_history():
 	client.learn(content)
 	return jsonify(200)
 
+@app.route('/api/get_login', methods=['GET', 'POST'])
+def get_login():
+	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
+	print(content)
+	client.create_user(content)
+	return jsonify(content)
+
+@app.route('/api/get_password', methods=['GET', 'POST'])
+def get_password():
+	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
+	print(content)
+	client.login(content)
+	return jsonify(content)
+
 @app.route('/api/get_content', methods=['GET', 'POST'])
 def get_content():
 	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
@@ -57,3 +71,6 @@ with app.app_context():
 
 if __name__ == '__main__':
 	app.run(debug=True)
+
+
+

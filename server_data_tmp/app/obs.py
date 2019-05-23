@@ -20,6 +20,12 @@ MAX_OBS_SIZE = 10
 LEARN = 1
 PREDICT = 2
 
+class DbWebPageError(Exception):
+	pass
+	
+class DbUserError(Exception):
+	pass
+
 class DB():
 	def __init__(self, db, user, password,host,port):
 		self.db = db
@@ -76,27 +82,6 @@ class obs(DB):
 		else:
 			return max_id
 
-	def setval_(self, table, max_id):
-		SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
-		
-		try:
-			self.cursor.execute(SETVAL)
-			self.conn.commit()
-		except:
-			self.conn.rollback()
-
-	def user_(self, name = 'maxim'):
-		INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}');'''.format(name)
-		try:
-			self.cursor.execute(INSERT_USERS)
-			self.conn.commit()
-			user_id = self.get_user_id_(name)
-			print(user_id)
-		except:
-			self.conn.rollback()
-			max_id = self.get_max_user_id_()
-			self.setval_("users", max_id)
-
 	def get_user_id_(self, name = 'maxim'):
 		SELECT_USERS_ID = '''SELECT id FROM "users" u WHERE u.name = '{}' '''.format(name)
 		self.cursor.execute(SELECT_USERS_ID)
@@ -115,7 +100,16 @@ class obs(DB):
 			self.conn.commit()
 		except:
 			self.conn.rollback()
-			Exception('webpage') 
+			print('web problem')
+
+	def web_page_insert_(self, url, web_id, user_id):
+		INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, url, 'NEMA', user_id, 0)
+		try:
+			self.cursor.execute(INSERT_WEB)
+			self.conn.commit()
+		except:
+			self.conn.rollback() 
+			print('web problem')
 
 	def get_webpage_id_(self, user_id, url):
 		SELECT_ID = '''SELECT id FROM "webpage" w WHERE w.url = '{}' AND w.user_id = {}'''.format(url, user_id)
@@ -123,7 +117,7 @@ class obs(DB):
 		[(web_id,),] = self.cursor.fetchall()
 
 		if not web_id:
-			Exception('no id found')	
+			raise Exception("incorrect webpage")
 		else:
 			return web_id
 
@@ -153,12 +147,12 @@ class obs(DB):
 						url = urlparse(event['current_page'])
 						event['current_page'] = url.netloc + url.path
 
-
-						self.user_()
-						user_id = self.get_user_id_()
+						user_id = self.get_user_id_(event['login'])
 
 						self.web_page_(event, user_id)
 						web_page_id = self.get_webpage_id_(user_id, event['current_page'])
+
+						print("here we gooo", user_id, web_page_id, event['current_page'])
 						
 						if user_id in self.obs.keys():
 							if web_page_id not in self.obs[user_id].keys():
@@ -187,6 +181,7 @@ class obs(DB):
 							self.click_speed[user_id][web_page_id].append(self.time_count_(event) - prev_click_time)
 						
 						prev_click_time = self.time_count_(event)
+
 					if event['type'] == WEBPAGE_TIME:
 						SELECT_TIME = '''SELECT time_on_page FROM "webpage" w WHERE w.id = {} AND w.user_id = {}'''.format(web_page_id, user_id)
 						self.cursor.execute(SELECT_TIME)
@@ -202,7 +197,7 @@ class obs(DB):
 						
 
 			except:
-				Exception('invalid json')	
+				raise Exception('invalid json')	
 		try:
 			if (self.velocity[user_id][web_page_id] or self.click_speed[user_id][web_page_id]) and (len(self.velocity[user_id][web_page_id]) + len(self.click_speed[user_id][web_page_id]) > MAX_EVENTS_SIZE):
 				print(user_id, web_page_id)
@@ -251,7 +246,7 @@ class Client(obs):
             self.connection = socket.create_connection((host, port), timeout)
         except socket.error as err:
             raise ClientSocketError("error create connection", err)
-
+    		 
     def _read(self):
         """Метод для чтения ответа сервера"""
         data = b""
@@ -274,19 +269,9 @@ class Client(obs):
 
         return payload
 
-    def _insert_web_page(self, url, web_id, user_id):
-    	INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, url, 'NEMA', user_id, 0)
-    	try:
-    		self.cursor.execute(INSERT_WEB)
-    		self.conn.commit()
-    	except:
-    		self.conn.rollback() 
-    		print('web problem')	
-
     def learn(self, data, user = 'maxim'):
     	event = []
     	print(data)
-    	self.user_(user)
     	user_id = self.get_user_id_(user)
     	for elem in data:
     		url = urlparse(elem['url'])
@@ -296,14 +281,16 @@ class Client(obs):
     	for e in event[:-1]:
     		if e not in indexing.keys():
     			indexing[e] = i
-    			self._insert_web_page(e, i, user_id)
+    			self.web_page_insert_(e, i + 1, user_id)
     			i += 1
-
 
     	obs_seq = []
     	for web_page in event[:-1]:
     		obs_seq.append(indexing[web_page])
-    	self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
+
+    	self.user_(user)
+    	user_id = self.get_user_id_(user)
+    	self.connection.sendall(f"learn {user_id} {obs_seq}\n".encode())
     	print(self._read())
 
     def put(self, json_str):
@@ -321,7 +308,7 @@ class Client(obs):
     			self.velocity[user_id][wp_id] = []
     			self.click_speed[user_id][wp_id] = []
     		try:
-    			self.connection.sendall("predict {} {}\n".format(user_id, obs_seq).encode())
+    			self.connection.sendall(f"predict {user_id} {obs_seq}\n".encode())
     		except socket.error as err:
     			raise ClientSocketError("error send data", err)
     		# разбираем ответ
@@ -334,6 +321,91 @@ class Client(obs):
             self.disconnect_db()
         except socket.error as err:
             raise ClientSocketError("error close connection", err)
+
+
+    def setval_(self, table, max_id):
+    	SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
+    	
+    	try:
+    		self.cursor.execute(SETVAL)
+    		self.conn.commit()
+    	except:
+    		self.conn.rollback()
+
+    def user_(self, name = 'maxim'):
+    	INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}', NULL, 0);'''.format(name)
+    	try:
+    		self.cursor.execute(INSERT_USERS)
+    		self.conn.commit()
+    		user_id = self.get_user_id_(name)
+    		print(user_id)
+    	except:
+    		self.conn.rollback()
+    		max_id = self.get_max_user_id_()
+    		self.setval_("users", max_id)
+
+    def create_password(self, login, password):
+    	UPDATE_STATUS = '''UPDATE "users" SET "password" = '{}', "status" = 0 WHERE "name" = '{}' '''.format(password, login)
+    	try:
+    		self.cursor.execute(UPDATE_STATUS)
+    		self.conn.commit()
+    	except:
+    		self.conn.rollback()
+
+   	def create_user(self, json_str):
+    	try:
+			json_data = json.loads('''{}'''.format(json_str))
+			login = json_data['login']
+			print(login)
+			self.user_(name)
+
+    	except:
+    	    raise Exception("invalid json")
+
+    def sign_up(self, json_str):
+    	try:
+			json_data = json.loads('''{}'''.format(json_str))
+			login = json_data['login']
+			password = json_data['pass']
+			print(login, password)
+			self.create_password(login, password)
+
+    	except:
+    	    raise Exception("invalid json")
+
+   	def change_status_(self, user, cur_status):
+   		UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
+   		try:
+   			self.cursor.execute(UPDATE_STATUS)
+   			self.conn.commit()
+   		except:
+   			self.conn.rollback()
+
+   	def check_user_(self, user, password):
+   		SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
+   		self.cursor.execute(SELECT_USER_INFO)
+   		[(user_id, user_password, user_status,),] = self.cursor.fetchall()
+   		if not user_id or not user_password or not user_status:
+   			raise Exception("invalid user")	
+   		else:
+   			if password == user_password:
+   				self.change_status_(user, UNBLOCK)
+   				return True
+   			else:
+   				if user_status == UNBLOCKED:
+   					self.change_status_(user, BLCOK)
+   					return False
+
+	def sign_in(self, json_str):
+    	try:
+			json_data = json.loads('''{}'''.format(json_str))
+			login = json_data['login']
+			if (self.check_user_(login)):
+				pass
+				# слать что-нибудь куда-нибудь
+    	except:
+    	    raise Exception("invalid json")
+
 
 
 # def _main():
