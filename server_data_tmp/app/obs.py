@@ -221,32 +221,32 @@ class obs(DB):
 		# print(self.obs)
 
 class ClientError(Exception):
-    """Общий класс исключений клиента"""
+	"""Общий класс исключений клиента"""
 	pass
 
 
 class ClientSocketError(ClientError):
-    """Исключение, выбрасываемое клиентом при сетевой ошибке"""
+	"""Исключение, выбрасываемое клиентом при сетевой ошибке"""
 	pass
 
 
 class ClientProtocolError(ClientError):
-    """Исключение, выбрасываемое клиентом при ошибке протокола"""
+	"""Исключение, выбрасываемое клиентом при ошибке протокола"""
 	pass
 
 
 class Client(obs):
 	def __init__(self, host, port, db, db_user, db_password, db_host, db_port, timeout=None):
-	    # класс инкапсулирует создание сокета
-	    # создаем клиентский сокет, запоминаем объект socke.socket в self 
-	    super().__init__(db, db_user, db_password, db_host, db_port)
-	    self.host = host
-	    self.port = port
-	    try:
-	        self.connection = socket.create_connection((host, port), timeout)
-	    except socket.error as err:
-	        raise ClientSocketError("error create connection", err)
-			 
+		# класс инкапсулирует создание сокета
+		# создаем клиентский сокет, запоминаем объект socke.socket в self 
+		super().__init__(db, db_user, db_password, db_host, db_port)
+		self.host = host
+		self.port = port
+		try:
+			self.connection = socket.create_connection((host, port), timeout)
+		except socket.error as err:
+			raise ClientSocketError("error create connection", err)
+		 
 	def _read(self):
 		"""Метод для чтения ответа сервера"""
 		data = b""
@@ -258,7 +258,7 @@ class Client(obs):
 			except socket.error as err:
 				raise ClientSocketError("error recv data", err)
 
-	    # не забываем преобразовывать байты в объекты str для дальнейшей работы
+		# не забываем преобразовывать байты в объекты str для дальнейшей работы
 		decoded_data = data.decode()
 
 		status, payload = decoded_data.split("\n", 1)
@@ -294,8 +294,8 @@ class Client(obs):
 		print(self._read())
 
 	def put(self, json_str):
-	    # отправляем запрос команды put
-	    # иногда ошибается
+		# отправляем запрос команды put
+		# иногда ошибается
 		user_id = self.add_obs(json_str)
 		count = 0
 		for wp_id in self.obs[user_id].keys():
@@ -315,7 +315,7 @@ class Client(obs):
 			print(self._read())
 		return -1
 
-    def close(self):
+	def close(self):
 		try:
 			self.connection.close()
 			self.disconnect_db()
@@ -323,7 +323,7 @@ class Client(obs):
 			raise ClientSocketError("error close connection", err)
 
 
-    def setval_(self, table, max_id):
+	def setval_(self, table, max_id):
 		SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
 		
 		try:
@@ -371,7 +371,7 @@ class Client(obs):
 			self.create_password(login, password)
 
 		except:
-		    raise Exception("invalid json")
+			raise Exception("invalid json")
 
 		def change_status_(self, user, cur_status):
 			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
@@ -404,7 +404,7 @@ class Client(obs):
 				pass
 				# слать что-нибудь куда-нибудь
 		except:
-		    raise Exception("invalid json")
+			raise Exception("invalid json")
 
 
 
