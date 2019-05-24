@@ -352,7 +352,7 @@ class Client(obs):
 		except:
 			self.conn.rollback()
 
-		def create_user(self, json_str):
+	def create_user(self, json_str):
 		try:
 			json_data = json.loads('''{}'''.format(json_str))
 			login = json_data['login']
