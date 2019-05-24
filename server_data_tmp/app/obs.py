@@ -222,189 +222,189 @@ class obs(DB):
 
 class ClientError(Exception):
     """Общий класс исключений клиента"""
-    pass
+	pass
 
 
 class ClientSocketError(ClientError):
     """Исключение, выбрасываемое клиентом при сетевой ошибке"""
-    pass
+	pass
 
 
 class ClientProtocolError(ClientError):
     """Исключение, выбрасываемое клиентом при ошибке протокола"""
-    pass
+	pass
 
 
 class Client(obs):
-    def __init__(self, host, port, db, db_user, db_password, db_host, db_port, timeout=None):
-        # класс инкапсулирует создание сокета
-        # создаем клиентский сокет, запоминаем объект socke.socket в self 
-        super().__init__(db, db_user, db_password, db_host, db_port)
-        self.host = host
-        self.port = port
-        try:
-            self.connection = socket.create_connection((host, port), timeout)
-        except socket.error as err:
-            raise ClientSocketError("error create connection", err)
-    		 
-    def _read(self):
-        """Метод для чтения ответа сервера"""
-        data = b""
-        # накапливаем буфер, пока не встретим "\n\n" в конце команды
-        while not data.endswith(b"\n\n"):
-            try:
-                data += self.connection.recv(1024)
-                print(data)
-            except socket.error as err:
-                raise ClientSocketError("error recv data", err)
+	def __init__(self, host, port, db, db_user, db_password, db_host, db_port, timeout=None):
+	    # класс инкапсулирует создание сокета
+	    # создаем клиентский сокет, запоминаем объект socke.socket в self 
+	    super().__init__(db, db_user, db_password, db_host, db_port)
+	    self.host = host
+	    self.port = port
+	    try:
+	        self.connection = socket.create_connection((host, port), timeout)
+	    except socket.error as err:
+	        raise ClientSocketError("error create connection", err)
+			 
+	def _read(self):
+		"""Метод для чтения ответа сервера"""
+		data = b""
+		# накапливаем буфер, пока не встретим "\n\n" в конце команды
+		while not data.endswith(b"\n\n"):
+			try:
+				data += self.connection.recv(1024)
+				print(data)
+			except socket.error as err:
+				raise ClientSocketError("error recv data", err)
 
-        # не забываем преобразовывать байты в объекты str для дальнейшей работы
-        decoded_data = data.decode()
+	    # не забываем преобразовывать байты в объекты str для дальнейшей работы
+		decoded_data = data.decode()
 
-        status, payload = decoded_data.split("\n", 1)
+		status, payload = decoded_data.split("\n", 1)
 
-        # если получили ошибку - бросаем исключение ClientError
-        if status == "error":
-            raise ClientProtocolError(payload)
+		# если получили ошибку - бросаем исключение ClientError
+		if status == "error":
+			raise ClientProtocolError(payload)
 
-        return payload
+		return payload
 
-    def learn(self, data, user = 'maxim'):
-    	event = []
-    	print(data)
-    	user_id = self.get_user_id_(user)
-    	for elem in data:
-    		url = urlparse(elem['url'])
-    		event.append(url.netloc + url.path)
-    	indexing = dict()
-    	i = 0
-    	for e in event[:-1]:
-    		if e not in indexing.keys():
-    			indexing[e] = i
-    			self.web_page_insert_(e, i + 1, user_id)
-    			i += 1
+	def learn(self, data, user = 'maxim'):
+		event = []
+		print(data)
+		user_id = self.get_user_id_(user)
+		for elem in data:
+			url = urlparse(elem['url'])
+			event.append(url.netloc + url.path)
+		indexing = dict()
+		i = 0
+		for e in event[:-1]:
+			if e not in indexing.keys():
+				indexing[e] = i
+				self.web_page_insert_(e, i + 1, user_id)
+				i += 1
 
-    	obs_seq = []
-    	for web_page in event[:-1]:
-    		obs_seq.append(indexing[web_page])
+		obs_seq = []
+		for web_page in event[:-1]:
+			obs_seq.append(indexing[web_page])
 
-    	self.user_(user)
-    	user_id = self.get_user_id_(user)
-    	self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
-    	print(self._read())
+		self.user_(user)
+		user_id = self.get_user_id_(user)
+		self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
+		print(self._read())
 
-    def put(self, json_str):
-        # отправляем запрос команды put
-        # иногда ошибается
-    	user_id = self.add_obs(json_str)
-    	count = 0
-    	for wp_id in self.obs[user_id].keys():
-    		count += len(self.obs[user_id][wp_id])
-    	if count > MAX_OBS_SIZE:
-    		obs_seq = self.get_obs_seq_(user_id)
-    		print(obs_seq)
-    		for wp_id in self.obs[user_id].keys():
-    			self.obs[user_id][wp_id] = []
-    			self.velocity[user_id][wp_id] = []
-    			self.click_speed[user_id][wp_id] = []
-    		try:
-    			self.connection.sendall("predict {} {}\n".format(user_id, obs_seq).encode())
-    		except socket.error as err:
-    			raise ClientSocketError("error send data", err)
-    		# разбираем ответ
-    		print(self._read())
-    	return -1
+	def put(self, json_str):
+	    # отправляем запрос команды put
+	    # иногда ошибается
+		user_id = self.add_obs(json_str)
+		count = 0
+		for wp_id in self.obs[user_id].keys():
+			count += len(self.obs[user_id][wp_id])
+		if count > MAX_OBS_SIZE:
+			obs_seq = self.get_obs_seq_(user_id)
+			print(obs_seq)
+			for wp_id in self.obs[user_id].keys():
+				self.obs[user_id][wp_id] = []
+				self.velocity[user_id][wp_id] = []
+				self.click_speed[user_id][wp_id] = []
+			try:
+				self.connection.sendall("predict {} {}\n".format(user_id, obs_seq).encode())
+			except socket.error as err:
+				raise ClientSocketError("error send data", err)
+			# разбираем ответ
+			print(self._read())
+		return -1
 
     def close(self):
-        try:
-            self.connection.close()
-            self.disconnect_db()
-        except socket.error as err:
-            raise ClientSocketError("error close connection", err)
+		try:
+			self.connection.close()
+			self.disconnect_db()
+		except socket.error as err:
+			raise ClientSocketError("error close connection", err)
 
 
     def setval_(self, table, max_id):
-    	SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
-    	
-    	try:
-    		self.cursor.execute(SETVAL)
-    		self.conn.commit()
-    	except:
-    		self.conn.rollback()
+		SETVAL = '''SELECT setval('{}_id_seq',{})'''.format(table, max_id)
+		
+		try:
+			self.cursor.execute(SETVAL)
+			self.conn.commit()
+		except:
+			self.conn.rollback()
 
-    def user_(self, name = 'maxim'):
-    	INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}', NULL, 0);'''.format(name)
-    	try:
-    		self.cursor.execute(INSERT_USERS)
-    		self.conn.commit()
-    		user_id = self.get_user_id_(name)
-    		print(user_id)
-    	except:
-    		self.conn.rollback()
-    		max_id = self.get_max_user_id_()
-    		self.setval_("users", max_id)
+	def user_(self, name = 'maxim'):
+		INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}', NULL, 0);'''.format(name)
+		try:
+			self.cursor.execute(INSERT_USERS)
+			self.conn.commit()
+			user_id = self.get_user_id_(name)
+			print(user_id)
+		except:
+			self.conn.rollback()
+			max_id = self.get_max_user_id_()
+			self.setval_("users", max_id)
 
-    def create_password(self, login, password):
-    	UPDATE_STATUS = '''UPDATE "users" SET "password" = '{}', "status" = 0 WHERE "name" = '{}' '''.format(password, login)
-    	try:
-    		self.cursor.execute(UPDATE_STATUS)
-    		self.conn.commit()
-    	except:
-    		self.conn.rollback()
+	def create_password(self, login, password):
+		UPDATE_STATUS = '''UPDATE "users" SET "password" = '{}', "status" = 0 WHERE "name" = '{}' '''.format(password, login)
+		try:
+			self.cursor.execute(UPDATE_STATUS)
+			self.conn.commit()
+		except:
+			self.conn.rollback()
 
-   	def create_user(self, json_str):
-    	try:
+		def create_user(self, json_str):
+		try:
 			json_data = json.loads('''{}'''.format(json_str))
 			login = json_data['login']
 			print(login)
 			self.user_(name)
 
-    	except:
-    	    raise Exception("invalid json")
+		except:
+			raise Exception("invalid json")
 
-    def sign_up(self, json_str):
-    	try:
+	def sign_up(self, json_str):
+		try:
 			json_data = json.loads('''{}'''.format(json_str))
 			login = json_data['login']
 			password = json_data['pass']
 			print(login, password)
 			self.create_password(login, password)
 
-    	except:
-    	    raise Exception("invalid json")
+		except:
+		    raise Exception("invalid json")
 
-   	def change_status_(self, user, cur_status):
-   		UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
-   		try:
-   			self.cursor.execute(UPDATE_STATUS)
-   			self.conn.commit()
-   		except:
-   			self.conn.rollback()
+		def change_status_(self, user, cur_status):
+			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
+			try:
+				self.cursor.execute(UPDATE_STATUS)
+				self.conn.commit()
+			except:
+				self.conn.rollback()
 
-   	def check_user_(self, user, password):
-   		SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
-   		self.cursor.execute(SELECT_USER_INFO)
-   		[(user_id, user_password, user_status,),] = self.cursor.fetchall()
-   		if not user_id or not user_password or not user_status:
-   			raise Exception("invalid user")	
-   		else:
-   			if password == user_password:
-   				self.change_status_(user, UNBLOCK)
-   				return True
-   			else:
-   				if user_status == UNBLOCKED:
-   					self.change_status_(user, BLCOK)
-   					return False
+		def check_user_(self, user, password):
+			SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
+			self.cursor.execute(SELECT_USER_INFO)
+			[(user_id, user_password, user_status,),] = self.cursor.fetchall()
+			if not user_id or not user_password or not user_status:
+				raise Exception("invalid user")	
+			else:
+				if password == user_password:
+					self.change_status_(user, UNBLOCK)
+					return True
+				else:
+					if user_status == UNBLOCKED:
+						self.change_status_(user, BLCOK)
+						return False
 
 	def sign_in(self, json_str):
-    	try:
+		try:
 			json_data = json.loads('''{}'''.format(json_str))
 			login = json_data['login']
 			if (self.check_user_(login)):
 				pass
 				# слать что-нибудь куда-нибудь
-    	except:
-    	    raise Exception("invalid json")
+		except:
+		    raise Exception("invalid json")
 
 
 
