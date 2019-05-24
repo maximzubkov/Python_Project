@@ -374,7 +374,7 @@ class Client(obs):
 			raise Exception("invalid json")
 
 		def change_status_(self, user, cur_status):
-			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
+			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(not cur_status, user)
 			try:
 				self.cursor.execute(UPDATE_STATUS)
 				self.conn.commit()
