@@ -2,7 +2,7 @@
 	"manifest_version": 2, 
 	"name": "Zamamotu", 
 	"description": "Basic service to track man's activity on a webpage", 
-	"version": "0.2.4" ,
+	"version": "0.2.8" ,
 	"content_scripts": [
 	  {
 	   	"matches": [
@@ -12,7 +12,7 @@
 	  }
 	],
 	"permissions": [
-	  "tabs","alarms","history","storage"
+	  "tabs","alarms","history","storage" , ""
 	],
 	"browser_action": {
 	  "default_icon": "1f408.png",
