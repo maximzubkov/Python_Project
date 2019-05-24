@@ -272,6 +272,7 @@ class Client(obs):
 	def learn(self, data, user = 'maxim'):
 		event = []
 		print(data)
+		self.user_(user)
 		user_id = self.get_user_id_(user)
 		for elem in data:
 			url = urlparse(elem['url'])
@@ -288,8 +289,6 @@ class Client(obs):
 		for web_page in event[:-1]:
 			obs_seq.append(indexing[web_page])
 
-		self.user_(user)
-		user_id = self.get_user_id_(user)
 		self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
 		print(self._read())
 
@@ -373,8 +372,9 @@ class Client(obs):
 		except:
 			raise Exception("invalid json")
 
+<<<<<<< HEAD
 		def change_status_(self, user, cur_status):
-			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(not cur_status, user)
+			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
 			try:
 				self.cursor.execute(UPDATE_STATUS)
 				self.conn.commit()
@@ -387,14 +387,30 @@ class Client(obs):
 			[(user_id, user_password, user_status,),] = self.cursor.fetchall()
 			if not user_id or not user_password or not user_status:
 				raise Exception("invalid user")	
+=======
+	def change_status_(self, user, cur_status):
+		UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(not cur_status, user)
+		try:
+			self.cursor.execute(UPDATE_STATUS)
+			self.conn.commit()
+		except:
+			self.conn.rollback()
+
+	def check_user_(self, user, password):
+		SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
+		self.cursor.execute(SELECT_USER_INFO)
+		[(user_id, user_password, user_status,),] = self.cursor.fetchall()
+		if not user_id or not user_password or not user_status:
+			raise Exception("invalid user")	
+		else:
+			if password == user_password:
+				self.change_status_(user, UNBLOCK)
+				return True
+>>>>>>> dcd36eac64c5011e5f6fbc4c4dca93f0a2e981b9
 			else:
-				if password == user_password:
-					self.change_status_(user, UNBLOCK)
-					return True
-				else:
-					if user_status == UNBLOCKED:
-						self.change_status_(user, BLCOK)
-						return False
+				if user_status == UNBLOCKED:
+					self.change_status_(user, BLCOK)
+					return False
 
 	def sign_in(self, json_str):
 		try:

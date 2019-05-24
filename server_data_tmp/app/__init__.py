@@ -34,7 +34,7 @@ def get_history():
 def get_login():
 	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
 	print(content)
-	# client.create_user(content)
+	client.create_user(content)
 	return jsonify(content)
 
 @app.route('/api/get_password', methods=['GET', 'POST'])
