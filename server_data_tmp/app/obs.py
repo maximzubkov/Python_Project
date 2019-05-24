@@ -372,22 +372,6 @@ class Client(obs):
 		except:
 			raise Exception("invalid json")
 
-<<<<<<< HEAD
-		def change_status_(self, user, cur_status):
-			UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(!cur_status, user)
-			try:
-				self.cursor.execute(UPDATE_STATUS)
-				self.conn.commit()
-			except:
-				self.conn.rollback()
-
-		def check_user_(self, user, password):
-			SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
-			self.cursor.execute(SELECT_USER_INFO)
-			[(user_id, user_password, user_status,),] = self.cursor.fetchall()
-			if not user_id or not user_password or not user_status:
-				raise Exception("invalid user")	
-=======
 	def change_status_(self, user, cur_status):
 		UPDATE_STATUS = '''UPDATE "users" SET "status" = {} WHERE "name" = '{}' '''.format(not cur_status, user)
 		try:
@@ -406,7 +390,7 @@ class Client(obs):
 			if password == user_password:
 				self.change_status_(user, UNBLOCK)
 				return True
->>>>>>> dcd36eac64c5011e5f6fbc4c4dca93f0a2e981b9
+
 			else:
 				if user_status == UNBLOCKED:
 					self.change_status_(user, BLCOK)
