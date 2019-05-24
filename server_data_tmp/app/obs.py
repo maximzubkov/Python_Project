@@ -290,7 +290,7 @@ class Client(obs):
 
     	self.user_(user)
     	user_id = self.get_user_id_(user)
-    	self.connection.sendall(f"learn {user_id} {obs_seq}\n".encode())
+    	self.connection.sendall("learn {} {}\n".format(user_id, obs_seq).encode())
     	print(self._read())
 
     def put(self, json_str):
@@ -308,7 +308,7 @@ class Client(obs):
     			self.velocity[user_id][wp_id] = []
     			self.click_speed[user_id][wp_id] = []
     		try:
-    			self.connection.sendall(f"predict {user_id} {obs_seq}\n".encode())
+    			self.connection.sendall("predict {} {}\n".format(user_id, obs_seq).encode())
     		except socket.error as err:
     			raise ClientSocketError("error send data", err)
     		# разбираем ответ
