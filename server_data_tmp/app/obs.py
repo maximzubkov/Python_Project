@@ -87,13 +87,14 @@ class obs(DB):
 		self.cursor.execute(SELECT_USERS_ID)
 		[(user_id,),] = self.cursor.fetchall()
 		if not user_id:
-			Exception('no id found')	
+			Exception('no id found')
+			return 1	
 		else:
 			return user_id
 
-	def web_page_(self, data_json, user_id):
+	def web_page_(self, data_json, user_id, user):
 		# TODO для многих пользователей
-		web_id = self.get_max_webpage_id_() + 1
+		web_id = self.get_max_webpage_id_(user) + 1
 		INSERT_WEB = '''INSERT INTO "webpage" (id, url, model, user_id, time_on_page) VALUES ({}, '{}', '{}', {}, {});'''.format(web_id, data_json['current_page'], 'NEMA', user_id, 0)
 		try:
 			self.cursor.execute(INSERT_WEB)
@@ -146,10 +147,10 @@ class obs(DB):
 					if user_id == -1:
 						url = urlparse(event['current_page'])
 						event['current_page'] = url.netloc + url.path
-
+						print(event['login'])
 						user_id = self.get_user_id_(event['login'])
 
-						self.web_page_(event, user_id)
+						self.web_page_(event, user_id, event['login'])
 						web_page_id = self.get_webpage_id_(user_id, event['current_page'])
 
 						print("here we gooo", user_id, web_page_id, event['current_page'])
@@ -269,10 +270,12 @@ class Client(obs):
 
 		return payload
 
-	def learn(self, data, user = 'maxim'):
+	def learn(self, data):
 		event = []
 		print(data)
-		self.user_(user)
+		user = data['login']
+		data = data['data']
+		#self.user_(user)
 		user_id = self.get_user_id_(user)
 		for elem in data:
 			url = urlparse(elem['url'])
@@ -332,7 +335,7 @@ class Client(obs):
 			self.conn.rollback()
 
 	def user_(self, name = 'maxim'):
-		INSERT_USERS = '''INSERT INTO "users" (name) VALUES ('{}', NULL, 0);'''.format(name)
+		INSERT_USERS = '''INSERT INTO "users" (name, password, status) VALUES ('{}', NULL, 0);'''.format(name)
 		try:
 			self.cursor.execute(INSERT_USERS)
 			self.conn.commit()
@@ -354,9 +357,9 @@ class Client(obs):
 	def create_user(self, json_str):
 		try:
 			json_data = json.loads('''{}'''.format(json_str))
-			login = json_data['login']
+			login = json_data[0]['login']
 			print(login)
-			self.user_(name)
+			self.user_(login)
 
 		except:
 			raise Exception("invalid json")
@@ -364,10 +367,11 @@ class Client(obs):
 	def sign_up(self, json_str):
 		try:
 			json_data = json.loads('''{}'''.format(json_str))
-			login = json_data['login']
-			password = json_data['pass']
+			login = json_data[0]['login']
+			password = json_data[0]['password']
 			print(login, password)
-			self.create_password(login, password)
+
+			self.check_user_(login, password)
 
 		except:
 			raise Exception("invalid json")
@@ -381,38 +385,25 @@ class Client(obs):
 			self.conn.rollback()
 
 	def check_user_(self, user, password):
-		SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' and '''.format(user)
+		SELECT_USER_INFO = '''SELECT * FROM "users" u WHERE u.name = '{}' '''.format(user)
 		self.cursor.execute(SELECT_USER_INFO)
-		[(user_id, user_password, user_status,),] = self.cursor.fetchall()
-		if not user_id or not user_password or not user_status:
-			raise Exception("invalid user")	
-		else:
+		[(user_id, user, user_password, user_status,),] = self.cursor.fetchall()
+		if not user_id:
+			raise Exception("invalid user")
+			return False	
+		else:	
+			if user_password == None:
+				self.create_password(user, password)
+				return True
 			if password == user_password:
 				self.change_status_(user, UNBLOCK)
 				return True
 
 			else:
 				if user_status == UNBLOCKED:
-					self.change_status_(user, BLCOK)
-					return False
-
-	def sign_in(self, json_str):
-		try:
-			json_data = json.loads('''{}'''.format(json_str))
-			login = json_data['login']
-			if (self.check_user_(login)):
-				pass
-				# слать что-нибудь куда-нибудь
-		except:
-			raise Exception("invalid json")
-
-
-
-# def _main():
-#     # проверка работы клиента
-#     client = Client("127.0.0.1", 8181, DB_maxim, USER_maxim, PASSWORD_maxim, HOST_maxim, PORT_maxim)
-#     client.put("learn", '''[{"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 58, "miliseconds": 957, "positionX": 632, "positionY": 682}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 39, "positionX": 745, "positionY": 258}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 80, "positionX": 750, "positionY": 197}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 111, "positionX": 682, "positionY": 316}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 120, "positionX": 619, "positionY": 480}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 129, "positionX": 613, "positionY": 505}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 142, "positionX": 604, "positionY": 561}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 158, "positionX": 604, "positionY": 588}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 174, "positionX": 612, "positionY": 614}, {"type": 0, "current_page": "https://vk.com/feed", "minutes": 32, "seconds": 59, "miliseconds": 192, "positionX": 651, "positionY": 606}]\n\n''')
-#     client.close()
+					pass
+					#self.change_status_(user, BLCOK)
+				return False
 
 
 # if __name__ == "__main__":

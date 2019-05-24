@@ -41,8 +41,9 @@ def get_login():
 def get_password():
 	content = ("""{}""".format(request.get_json(force=True))).replace('\'','\"')
 	print(content)
-	client.login(content)
-	return jsonify(content)
+	res = client.sign_up(content)
+	result = {'result': res}
+	return jsonify(result)
 
 @app.route('/api/get_content', methods=['GET', 'POST'])
 def get_content():
