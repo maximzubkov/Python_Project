@@ -1,5 +1,5 @@
 var isExtensionOn = false;
-var microsecondsPerTenYears = 1000 * 60 * 60 * 24 * 7 * 31 * 12 *10;
+var microsecondsPerTenYears = 1000 * 60 * 60 * 24 * 7 * 31 * 12 *100000;
 var tenYearsAgo = (new Date).getTime() - microsecondsPerTenYears;
 
 function SHA256(s) {
@@ -171,6 +171,7 @@ chrome.history.search({
     });
     setTimeout(function(){
         res.send()
+        // console.log(res.pages)
     }, 1000);
 });
 

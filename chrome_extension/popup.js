@@ -188,7 +188,7 @@ var passwordToSend = {
           body: JSON.stringify(this.password)
         }).then(res => {
             this.serverResponse.push(res)
-            console.log(res['result'])
+            console.log(res.body)
             return res
         })
     },
@@ -236,4 +236,9 @@ function changeStatus(status) {
         chrome.tabs.sendMessage(tabs[0].id, msg);
     }
 }
+
+
+// function finalResult (responseStatus) {
+//     console.log('')
+// }
 
